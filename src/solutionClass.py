@@ -31,7 +31,7 @@ class Generation:
     def getCurrentGenome(self):
         Genome = [None]*self.size
         for ii, individual in enumerate(self.population):
-            Genome[ii] = individual.genome
+            Genome[ii] = individual.genotype
             
         return Genome
     
@@ -42,7 +42,7 @@ class Generation:
         # Record current Best
         self.best = population[np.argmin(scores)]
         self.bestScore = scores[np.argmin(scores)]
-        self.bestGenome = self.best.genome           
+        self.bestGenome = self.best.genotype           
     
     # def __getitem__(self, index):
     #     return self.Individuals[index]
@@ -54,14 +54,26 @@ class Generation:
 # TODO:
     # What restrictions exist on genes? an they be any object
 
+
+# TODO:
+    # Make the default genome a array of arrays.
+#   Can the default genome be a list of list??
+
+
 class DefaultGenePool:
     
     """
     The gene pool generates valid "genes" or solutions.
     
+    A gene pool is a reflection of all current genes. It differes from the 
+    environment in that the genes change through the analysis.
+    
+    The environment is static!
+    Perhaps the methods of generating genes should be in the environment?
+    
     This default gene pool selects valid solutions from a uniform distribution
     between two different limits.
-    
+       
     """
     
     # Generates valid solutions for each individual genom
@@ -75,12 +87,12 @@ class DefaultGenePool:
         gene = dx*rand + self.llims
         return gene
     
-    def getGenome(self):
+    def getGenotype(self):
         Ngenes = len(self.llims)
         rand = np.random.random(Ngenes)
-        genome = self.getGene(rand)
+        genotype = self.getGene(rand)
         
-        return genome
+        return genotype
 
 
 # =============================================================================
@@ -88,16 +100,16 @@ class DefaultGenePool:
 # =============================================================================
 
 class Individual:
-    """ Contains the genome and some other stuff.
+    """ Contains the genotype and some other stuff.
     
-    A genome is a valid solution in the solution space.
+    A genotype is a valid solution in the solution space.
     Each will have a name and a generation number.
     
     The Individual will also have a result, which is the output of the test.
     """
     
-    def __init__(self, genome):
-        self.genome = genome
+    def __init__(self, genotype):
+        self.genotype = genotype
         self.result = None
         
     def setname(self, name):

@@ -12,29 +12,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-
-# function to be omptimzied
-
-def optimizeFunction(x, y, z):
-    
-    result = x**2*y**5 + z
-    
-    return result
-
-
-def ftest(individual):
-    
-    result = optimizeFunction(*individual.genome)
-    individual.result = result
-    return result
-
-def fitness(individual, Environment):
-    
-    """ In this case getting fitness from our result is trivial
-    """
-    
-    fitness = individual.result
-    return fitness
+from functions import ftest, fitness
 
 
 np.random.seed(40)
@@ -61,6 +39,11 @@ fig, ax = plt.subplots()
 test.plotAvgFitness(fig, ax, Analysis)
 test.plotMinFitness(fig, ax, Analysis)
 test.plotTotalFitness(fig, ax, Analysis)
+
+
+
+
+
 # yAvg = np.zeros(Ngen)
 # ybest = np.zeros(Ngen)
 # scoreAvg = np.zeros(Ngen)

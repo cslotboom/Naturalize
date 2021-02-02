@@ -9,7 +9,7 @@ Created on Fri Dec 18 22:59:59 2020
 import naturalize as test
 import numpy as np
 import os
-import hysteresis.hys as hys
+import hysteresis as hys
 
 import matplotlib.pyplot as plt
 import openseespy.opensees as op
@@ -181,7 +181,7 @@ def fitness(individual, environment):
 
 
     try:
-        diff, test = hys.CompareHys(hys1, hys2)
+        diff, test = hys.compareHys(hys1, hys2)
     except:
         diff  = 10**6
    
@@ -189,7 +189,7 @@ def fitness(individual, environment):
 
 
 
-np.random.seed(40)
+# np.random.seed(40)
 llims =  np.array([21.1*10**3, 2.6*10**6, 0.015, 19, .95, .15]) * 0.
 ulims =  np.array([21.1*10**3, 2.6*10**6, 0.015, 19, .95, .15]) * 1.5
 genePool = test.DefaultGenePool(llims, ulims)
@@ -197,9 +197,9 @@ analysisEnvironment = Environment()
 
 helper = test.AlgorithmHelper(ftest, fitness, genePool, environment = analysisEnvironment)
 
-Ngen = 50
+Ngen = 100
 Npop = 30
-Ncouples = 10
+Ncouples = 8
 Nsurvive = 2
 mutateThresold = 0.1
 
@@ -213,7 +213,7 @@ test.pickleAnalysis(Analysis, 'OpenSees.obj')
 
 out = test.readPickle('OpenSees.obj')
 fig, ax = plt.subplots()
-# test.plotAvgFitness(fig, ax, out)
+test.plotAvgFitness(fig, ax, out)
 test.plotMinFitness(fig, ax, out)
 test.plotTotalFitness(fig, ax, out)
-
+ax.set_ylim(0,3000)

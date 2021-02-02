@@ -17,8 +17,8 @@ def getGenes(Analysis, geneIndex):
     
     for ii in range(Ngen):
         # Get the genome
-        tempGenome = np.array(Analysis.gens[ii].getCurrentGenome())
-        geneVals[ii,:] = tempGenome[:,geneIndex]
+        tempGenotype = np.array(Analysis.gens[ii].getCurrentGenotype())
+        geneVals[ii,:] = tempGenotype[:,geneIndex]
         
     return geneVals        
 

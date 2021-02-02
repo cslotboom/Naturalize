@@ -43,6 +43,43 @@ class GeneticAlgorithm:
     
     def __init__(self, Helper, Ngen, Npopulation, Ncouples, Nsurvive, mutateThresold
                  ,recordGenerations = True):
+        """
+        The test is where the indivdual passes through the environment.
+        This will lead to some raw result.
+        The fitness function is then used to process the raw result and get
+        the scalar fitness quantity.
+        
+        TODO: consider combining both functions into one.
+        We could combine both into one function if we'd like.
+        
+        That is then. For many problems
+
+        Parameters
+        ----------
+        Helper : TYPE
+            DESCRIPTION.
+        Ngen : TYPE
+            DESCRIPTION.
+        Npopulation : TYPE
+            DESCRIPTION.
+        Ncouples : TYPE
+            DESCRIPTION.
+        Nsurvive : TYPE
+            DESCRIPTION.
+        mutateThresold : TYPE
+            DESCRIPTION.
+        recordGenerations : TYPE, optional
+            DESCRIPTION. The default is True.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        
+        
+        
 
         # Optimization parameters
         self.Ngen = Ngen
@@ -115,8 +152,8 @@ class GeneticAlgorithm:
         """
         # add new random members
         while len(new_population) < self.Npopulation:
-            newGenome = self.genePool.getGenome()
-            new_population += [Individual(newGenome)]
+            newGenotype = self.genePool.getGenotype()
+            new_population += [Individual(newGenotype)]
     
 
     def testGen(self, generation):
@@ -128,7 +165,7 @@ class GeneticAlgorithm:
         # Test individuals
         for individual in generation.population:
             #TODO: consider if it's better to change individual in funcition
-            result = self.test(individual)
+            result = self.test(individual, self.environment)
             individual.result = result
             
             
@@ -168,7 +205,7 @@ class GeneticAlgorithm:
         self.BestValues[generation.gen - 1] = self.currentBestScore 
         
         print('Current best score:', self.currentBestScore)    
-        print('Current best genome:', self.best.genome)    
+        print('Current best genotype:', self.best.genotype)    
             
         
         
@@ -214,7 +251,9 @@ class GeneticAlgorithm:
         currentGen.scores = self.scoreGen(currentGen)
         currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
         self.currentBestScore = np.min(currentGen.scores)
-        
+        currentGen.recordBest()
+        self.best = currentGen.best
+        # self.checkIfBest(currentGen)
 
         for ii  in range(self.Ngen):
             print('Generation ', ii + 1)
@@ -239,13 +278,13 @@ class GeneticAlgorithm:
             
             # Record the current solution
             # currentBest = currentGen.best
-            # print(currentGen.best.genome)
+            # print(currentGen.best.genotype)
 
             
         # Score final generation
         population = currentGen.population
         
-        # print(currentGen.best.genome)
+        # print(currentGen.best.genotype)
         return currentGen.best
         
         
