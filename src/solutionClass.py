@@ -78,19 +78,32 @@ class DefaultGenePool:
     
     # Generates valid solutions for each individual genom
     def __init__(self, llims, ulims):
+        """
+        llims and ulims is a list of the bounds on each gene.
+        They are each a list Ngene big, that contains a np array of size of the gene
+        """
         self.llims = llims
         self.ulims = ulims
 
-    def getGene(self, rand):
+    def getGene(self, rand, lbounds, ubounds):
         
-        dx = self.ulims - self.llims
-        gene = dx*rand + self.llims
+        dx = ubounds - lbounds
+        gene = dx*rand + lbounds
         return gene
     
     def getGenotype(self):
+        """
+        Gets all genes and stores it in a container
+        """
+        
         Ngenes = len(self.llims)
-        rand = np.random.random(Ngenes)
-        genotype = self.getGene(rand)
+        genotype = []
+        for ii in range(Ngenes):
+        
+            lbounds = self.llims[ii]
+            ubounds = self.ulims[ii]
+            rand = np.random.random(Ngenes)
+            genotype.append(self.getGene(rand, lbounds,ubounds ))
         
         return genotype
 
@@ -109,7 +122,10 @@ class Individual:
     """
     
     def __init__(self, genotype):
+        
+        # Check if 
         self.genotype = genotype
+        self.Ngenes = len(genotype)
         self.result = None
         
     def setname(self, name):

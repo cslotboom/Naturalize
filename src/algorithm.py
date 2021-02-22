@@ -77,9 +77,7 @@ class GeneticAlgorithm:
 
         """
         
-        
-        
-        
+
 
         # Optimization parameters
         self.Ngen = Ngen
@@ -167,6 +165,7 @@ class GeneticAlgorithm:
             #TODO: consider if it's better to change individual in funcition
             result = self.test(individual, self.environment)
             individual.result = result
+            # print(result)
             
             
     def scoreGen(self, currentGen):
@@ -247,7 +246,7 @@ class GeneticAlgorithm:
         IntialPop = initPopulation(self.Npopulation, self.genePool)
         currentGen = Generation(IntialPop, gen)
                 
-        # self.Scorebest = 
+        # Inialize the scores
         currentGen.scores = self.scoreGen(currentGen)
         currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
         self.currentBestScore = np.min(currentGen.scores)
@@ -291,8 +290,11 @@ class GeneticAlgorithm:
         
 def pickleAnalysis(geneticAlgorithm, fileName):
     
-    filehandler = open(fileName, 'wb') 
-    pickle.dump(geneticAlgorithm, filehandler)
+    filehandler = open(fileName, 'wb')
+    try:
+        pickle.dump(geneticAlgorithm, filehandler)
+    except:
+        pass
     filehandler.close()
     
     

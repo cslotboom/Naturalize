@@ -32,7 +32,24 @@ class defaultEnvironment:
 
         pass
 
-  
+
+
+def crossGene(genea, geneb):
+    
+    # Nunits = len(genea)
+    Nunits = max(len(genea), len(geneb))
+    
+    # pick a random cut point
+    cut = np.random.choice(np.arange(Nunits))   
+       
+    # Concetenate makes a new object, no need for copies.
+    aOut = np.concatenate([genea[:cut], geneb[cut:]])
+    bOut = np.concatenate([geneb[:cut], genea[cut:]])
+    
+    return aOut, bOut
+    
+    
+    
 def defaultCrossover(a, b):
     
     """
@@ -45,8 +62,6 @@ def defaultCrossover(a, b):
     The default funcitons works for solutions a and b, where c is also a solution
     """
     
-    
-    
     # This function allows us to generate two new solutions by swaping two
     # old solutions a and b.
     
@@ -55,19 +70,39 @@ def defaultCrossover(a, b):
     
     genotypea = a.genotype
     genotypeb = b.genotype
-    Ngenes = len(genotypea)
+    Ngenes = a.Ngenes
+    
+    aOut = [None]*Ngenes
+    bOut = [None]*Ngenes
+    
+    for ii in range(Ngenes):
+        aOut[ii], bOut[ii] = crossGene(genotypea[ii], genotypeb[ii])
         
-    aOut = np.zeros(Ngenes)
-    bOut = np.zeros(Ngenes)
-    
-    # pick a random cut point
-    cut = np.random.choice(np.arange(Ngenes))   
-       
-    # Concetenate makes a new object, no need for copies.
-    aOut = np.concatenate([genotypea[:cut], genotypeb[cut:]])
-    bOut = np.concatenate([genotypeb[:cut], genotypea[cut:]])
-    
     return (Individual(aOut), Individual(bOut))
+
+
+def mutateGene(individual, oldGene, tempGene, threshold):
+            # for each value we randomly mutate depeding on the threshold.
+        N = len(oldGene)
+        Pvector = np.random.random_sample(N)
+        
+        # Get the genotype and a new genotype
+
+        newGene = np.zeros(N)
+        
+        # Find the first value less than the threshold
+        
+        # Find the values that were mutated, assign them values form the new gene.
+        mutateIndexes = np.where(Pvector < threshold)
+        newGene[mutateIndexes] = tempGene[mutateIndexes]
+        
+        
+        mask = np.ones(N, np.bool)
+        mask[mutateIndexes] = 0
+        newGene[mask] = oldGene[mask]
+        
+        return newGene
+        
 
 
 def defaultMutate(individual, threshold, GenePool):
@@ -86,20 +121,18 @@ def defaultMutate(individual, threshold, GenePool):
     """   
     
     # Given an individual, randomly create a new solution
-    
-    # for each value we randomly mutate depeding on the threshold.
-    N = len(individual.genotype)
-    Pvector = np.random.random_sample(N)
-    
-    # Get the genotype and a new genotype
-    currentGenotype = individual.genotype
+    Ngenes = len(individual.genotype)
+    newGenotype = [None]*Ngenes
     tempGenotype = GenePool.getGenotype()
     
-    # Find the first value less than the threshold
-    mutateIndexes = np.where(Pvector < threshold)
-    currentGenotype[mutateIndexes] = tempGenotype[mutateIndexes]
     
-    return Individual(currentGenotype)
+    for ii in range(Ngenes):
+        oldGene = individual.genotype[ii]
+        tempGene    = tempGenotype[ii]
+        newGenotype[ii] = mutateGene(individual, oldGene, tempGene, threshold)
+
+    
+    return Individual(newGenotype)
 
 
 # =============================================================================
