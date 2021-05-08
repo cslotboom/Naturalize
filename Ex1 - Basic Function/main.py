@@ -16,8 +16,8 @@ from functions import ftest, fitness
 
 
 np.random.seed(40)
-llims = np.array([-10, -10, -10])
-ulims = np.array([10, 10, 10])
+llims = [np.array([-10, -10, -10])]
+ulims = [np.array([10, 10, 10])]
 genePool = test.DefaultGenePool(llims, ulims)
 
 
