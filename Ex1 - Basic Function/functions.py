@@ -10,14 +10,14 @@ Created on Fri Dec 18 22:59:59 2020
 
 def optimizeFunction(x, y, z):
     
-    result = x**2*y**5 + z
+    result = 2*x + 2*y - z
     
     return result
 
 
 def ftest(individual, env):
     
-    result = optimizeFunction(*individual.genotype)
+    result = optimizeFunction(*individual.genotype[0])
     individual.result = result
     return result
 
