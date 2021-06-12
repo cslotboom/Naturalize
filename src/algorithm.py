@@ -5,16 +5,15 @@ Created on Sun Dec 20 18:43:11 2020
 @author: Christian
 """
 
-
+import os
 import numpy as np
 from .solutionClass import Individual, Generation, DefaultGenePool
 
 from .defaultFuncs import (initPopulation, defaultEnvironment, 
-                           defaultCrossover, defaultMutate, 
+                           defaultCrossover, defaultMutate, defaultFitness,
                            defaultFitnessProbs, pick_Individual, 
                            namePopulation)
 import pickle 
-
 
 class AlgorithmHelper:
     """ 
@@ -22,7 +21,7 @@ class AlgorithmHelper:
     genetic algorithm class
     """
     
-    def __init__(self, ftest, ffit, 
+    def __init__(self, ftest, ffit = defaultFitness, 
                  genePool = DefaultGenePool,   
                  fmut = defaultMutate, 
                  fcross = defaultCrossover, 
@@ -39,10 +38,18 @@ class AlgorithmHelper:
         
         self.environment = environment
 
+
+
+"""
+Contains the logic behind the 
+"""
+
+
+
 class GeneticAlgorithm:
     
-    def __init__(self, Helper, Ngen, Npopulation, Ncouples, Nsurvive, mutateThresold
-                 ,recordGenerations = True):
+    def __init__(self, Npop, Ncouples, Nsurvive, Helper, mutThresold = 0.1
+                 , recordGenerations = False):
         """
         The test is where the indivdual passes through the environment.
         This will lead to some raw result.
@@ -52,54 +59,53 @@ class GeneticAlgorithm:
         TODO: consider combining both functions into one.
         We could combine both into one function if we'd like.
         
+        TODO:
+            Consider making mutate affect ALL genes.
+            The more genes that are added, the less likely an individual will
+            stay the same.
+            I guess that probably is true to nature..
+        
+        
         That is then. For many problems
 
         Parameters
         ----------
-        Helper : TYPE
-            DESCRIPTION.
-        Ngen : TYPE
-            DESCRIPTION.
-        Npopulation : TYPE
-            DESCRIPTION.
-        Ncouples : TYPE
-            DESCRIPTION.
-        Nsurvive : TYPE
-            DESCRIPTION.
-        mutateThresold : TYPE
-            DESCRIPTION.
-        recordGenerations : TYPE, optional
-            DESCRIPTION. The default is True.
+        Helper : object
+            The helper object to use for the analysis.
+        Npop : int
+            The population to be considered.
+        Ncouples : int
+            The number of couples to be considered.
+        Nsurvive : int
+            The number of survivers to be considered. These reach the next
+            generation unchanged.
+        mutThresold : float
+            The likilhood of a mutation occuring in each gene individual.
+        recordGenerations : boolean, optional
+            A toggle that turns on or off the storing of generations. 
+            The default is True, which stores all generations
 
         Returns
         -------
         None.
 
         """
-        
-
 
         # Optimization parameters
-        self.Ngen = Ngen
-        self.Npopulation = Npopulation
+        # self.Ngen = Ngen
+        self.Npop = Npop
         self.Ncouples = Ncouples
         self.Nsurvive = Nsurvive
-        self.mutateThresold = mutateThresold   
-        
-        
+        self.mutThresold = mutThresold
+                
         # Record each generation if the user wants
-        self.recordGens = recordGenerations
-        if recordGenerations == True:
-            self.gens = [None]*Ngen
+        self.recordGens = recordGenerations       
         
-        # Parameters for recording the prior and current best
-        self.CurrentBest = None
-        self.BestValues = np.zeros(Ngen)
-        
-        
+        # if Helper == None:
+        #     Helper = AlgorithmHelper()
         # Assign the key functions
         self.genePool = Helper.genePool
-        self.test = Helper.ftest
+        self.ftest = Helper.ftest
         self.fitness = Helper.ffit
         self.cross = Helper.fcross
         self.mutate = Helper.fmut
@@ -117,8 +123,8 @@ class GeneticAlgorithm:
         mate2 = pick_Individual(population, fitnessProbs)
             
         child1, child2 = self.cross(mate1, mate2)
-        child1 = self.mutate(child1, self.mutateThresold, self.genePool)
-        child2 = self.mutate(child2, self.mutateThresold, self.genePool)
+        child1 = self.mutate(child1, self.mutThresold, self.genePool)
+        child2 = self.mutate(child2, self.mutThresold, self.genePool)
         
         return [child1, child2]
         
@@ -132,16 +138,21 @@ class GeneticAlgorithm:
             
         return Offspring
         
-    def getSurvivers(self, population, fitnessProbs):
+    def getSurvivers(self, population, fitnessProbs, scores):
         """
         Chooses surviving members.
         """
         
-        survivors = []
-        for jj in range(self.Nsurvive):
-            survivors += [pick_Individual(population, fitnessProbs)  ] 
+        # survivors = []
+        # for jj in range(self.Nsurvive):
+        #     survivors += [pick_Individual(population, fitnessProbs)]
+        
+        Index = scores.argsort()[:self.Nsurvive]
+        pop = np.array(population)
+        survivors = pop[Index]
             
-        return survivors
+            
+        return list(survivors)
 
     def addRandom(self, new_population):
         
@@ -149,24 +160,20 @@ class GeneticAlgorithm:
         Adds random individuals to a new population.
         """
         # add new random members
-        while len(new_population) < self.Npopulation:
+        while len(new_population) < self.Npop:
             newGenotype = self.genePool.getGenotype()
             new_population += [Individual(newGenotype)]
     
-
     def testGen(self, generation):
         
         """
         Tests all the individuals in the population
         """
-        
         # Test individuals
         for individual in generation.population:
             #TODO: consider if it's better to change individual in funcition
-            result = self.test(individual, self.environment)
+            result = self.ftest(individual, self.environment)
             individual.result = result
-            # print(result)
-            
             
     def scoreGen(self, currentGen):
         
@@ -179,7 +186,6 @@ class GeneticAlgorithm:
         
         return currentGen.scores
     
-    
     def score_population(self, population):
         # Find scores for every item of hte pupulation
         
@@ -190,30 +196,267 @@ class GeneticAlgorithm:
             scores += [score]
             
         return np.array(scores)    
-    
-    
-    def checkIfBest(self, generation):
+
+    def recordIfBest(self, generation):
         """       
-        Checks if the value is the best, stores it if it isn't
+        Checks if the best in the current generation is better than all priors 
+        stores it if it is.
         """       
         
+        # TODO: Store genes, notindividual!
+            # Why? Storing the individual seems fine.
+        
+        # self.genBestIndivduals = generation.best
         
         if generation.bestScore <= self.currentBestScore:
-            self.best = generation.best
+            # If the current generation  is better, store the new best value
+            self.currentBest = generation.best
             self.currentBestScore = generation.bestScore
-        self.BestValues[generation.gen - 1] = self.currentBestScore 
-        
-        print('Current best score:', self.currentBestScore)    
-        print('Current best genotype:', self.best.genotype)    
             
+            self.cumBestIndivduals[generation.gen - 1] = generation.best 
+        
+        # If it's the first generation, store the value no matter what.
+        elif generation.gen == 0:
+            self.cumBestIndivduals[generation.gen - 1] = generation.best
+            
+        # if the current score isn't bigger, store the old one.
+        else:
+            self.cumBestIndivduals[generation.gen - 1] = self.cumBestIndivduals[generation.gen - 2] 
+        
+        # Store the current best score.
+        self.genBestValues[generation.gen - 1] = generation.bestScore
+        self.cumBestValues[generation.gen - 1] = self.currentBestScore 
+        # self.genBestValue[generation.gen - 1] = self.currentBestScore 
+        # self.cumtValues[generation.gen - 1] = self.currentBestScore 
+
+    def optimize(self, Ngen, intialGen = None):
+        
+        # Intialize variables
+        self.Ngen = Ngen
+
+        """
+        intiailizes recording variables.
+        """
+        # Recorder
+        if self.recordGens == True:
+            self.gens = [None]*Ngen
+        
+        # Parameters for recording the prior and current best
+        self.currentBest = None
+        self.genBestIndivduals = [None]*Ngen   # The best individual of the
+        self.genBestValues  = [None]*Ngen   # The best individual of the
+        
+        
+        self.cumBestValues = np.zeros(Ngen)
+        self.cumBestGenotypes = [None]*Ngen        
+        self.cumBestIndivduals = [None]*Ngen   # The total best individual
+        # gens = [None]*self.Ngen
+                
+        # Intialize population with a dumby generation
+        print('Generation 0')       
+        gen = 0
+
+        if intialGen == None:
+            # Initialize the population 
+            IntialPop = initPopulation(self.Npop, self.genePool)
+            currentGen = Generation(IntialPop, gen)
+        else:
+            currentGen = intialGen
+        
+        """
+        Gets the score of the generation
+        """
+        
+        
+        # Inialize the scores
+        currentGen.scores = self.scoreGen(currentGen)
+        currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
+        self.currentBestScore = np.min(currentGen.scores)
+        currentGen.setGenBest()
+        
+        self.currentGen = currentGen
+        self.currentBest = currentGen.best
+        # self.checkIfBest(currentGen)
+
+        for ii  in range(self.Ngen):
+            self.analyzeGeneration(ii)
+
+        return self.currentBest
+
+
+    def analyzeGeneration(self, ii: int):
+        print('Generation ', ii + 1)
+        currentGen = self.currentGen
+       
+        # Record the old generation
+        if self.recordGens == True:
+            self.gens[ii] = currentGen
+
+        ## Generation
+        # Get the next generatation
+        currentGen = getNextGen(self, currentGen, ii + 1)
+        
+        # Score the generation
+        currentGen.scores = self.scoreGen(currentGen)
+        currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
+        
+        ## Record
+        # Record the best value int the current generation
+        currentGen.setGenBest()
+                    
+        self.genBestIndivduals[ii] = currentGen.best
+        
+        # Record the best values
+        self.recordIfBest(currentGen)
+        
+        # Record the current solution
+        # currentBest = currentGen.best
+        # print(currentGen.best.genotype)
+        
+        # Update the generation
+        self.currentGen = currentGen        
+        
+        # TODO: move print to recorder.
+        print('Current best score:', self.currentBestScore)    
+        print('Current best genotype:', self.currentBest.genotype)    
+
+    def initPopulation(self):
+        
+        return initPopulation(self.Npop, self.genePool)
+
+def getNextGen(analysis, oldGeneration, genNumber):
+    # Here we curate the population with some rules.
+    # We first pick surviving genes by allowing the existing population to reproduce.
+    # allow members of the population to reporuduce based on their relative score; 
+    # i.e., if their score is higher they're more likely to reproduce
+    
+    scores = oldGeneration.scores
+    fitnessProbs = oldGeneration.fitnessProbs
+    population = oldGeneration.population
+    ############################################################
+
+    new_population = []
+    new_population += analysis.getOffspring(population, fitnessProbs)
+    new_population += analysis.getSurvivers(population, fitnessProbs, scores)
+        
+    # add new random members to fill the rest of the population.
+    analysis.addRandom(new_population)
+        
+    # #replace the old population with a real copy
+    # # population = copy.deepcopy(new_population)
+    # population = new_population
+    new_generation = Generation(new_population, genNumber)
+    
+    namePopulation(new_population, genNumber)
+
+    return new_generation
+
+
+# =============================================================================
+# 
+# =============================================================================
+
+
+class Analysis():
+    
+    def __init__(self, algorithm, recorder=None, printStatus = True):
+   
+        self.algorithm = algorithm
+        self.recorder = recorder
+        self.printStatus = False
+        
+        self.genCount = 0
+        self.currentGen = None
+        self.currentBest = None
+        
+        if algorithm.ftest == None:
+            raise Exception('No test function assigned to the algorithm.')
+    
+    def scoreCurrentGen(self):
+        #TODO: this may be slow
+        
+        currentGen =  self.currentGen
+        
+        # Inialize the scores
+        currentGen.scores = self.algorithm.scoreGen(currentGen)
+        currentGen.fitnessProbs = self.algorithm.getfitnessProbs(currentGen.scores)
+        
+        # Record the best value int the current generation
+        currentGen.setGenBest()
+        self.currentBest = currentGen.best.genotype
+        
+    def initGeneration(self):
+        """
+        makes the first genreration
+        
+        """
+        if self.printStatus == True:
+            print('Generation 0')       
+        gen = 0
+
+        IntialPop = self.algorithm.initPopulation()
+        self.currentGen = Generation(IntialPop, gen)
+        self.scoreCurrentGen()
+        # self.initRecorder()
+        
+        # Set the current generation and best score
+        # self.currentGen = currentGen
+        self.currentBestScore = np.min(self.currentGen.scores)
+        
+        
+    def record(self):
+        """
+        If there is a recorder active, record an instance of the current
+        generation.
+        """
+        if self.recorder != None:
+            self.recorder.record(self.currentGen)
+    
+    
+    def runAnalysis(self, Ngen, intialGen = None, printStatus = True):
+        
+        # Intialize variables
+        self.Ngen = Ngen
+        if intialGen == None:
+            self.initGeneration()
+            self.record()
+
+        for ii in range(self.Ngen):
+            newGen = self.getNextGen()            
+            self.analyzeGeneration(newGen)
+            
+            self.record()
+
+        return self.currentBest        
+    
+    def analyzeGeneration(self, newGen):
+        self.genCount += 1
+        
+        print(f'Generation {self.genCount}')
+       
+        ## Get a new generation
+
+        
+        # Score the generation
+        # self.algorithm.scoreGen(currentGen)
+        newGen.scores = self.algorithm.scoreGen(newGen)
+        newGen.fitnessProbs = self.algorithm.getfitnessProbs(newGen.scores)
+        newGen.setGenBest()
+        
+        self.currentGen = newGen       
+        self.currentBest = newGen.best.genotype
         
         
         
-    def getNewGen(self, oldGeneration, genNumber):
+    def getNextGen(self):
         # Here we curate the population with some rules.
         # We first pick surviving genes by allowing the existing population to reproduce.
         # allow members of the population to reporuduce based on their relative score; 
         # i.e., if their score is higher they're more likely to reproduce
+        
+        oldGeneration = self.currentGen
+        genNumber = self.genCount
+        algorithm  = self.algorithm
         
         scores = oldGeneration.scores
         fitnessProbs = oldGeneration.fitnessProbs
@@ -221,11 +464,11 @@ class GeneticAlgorithm:
         ############################################################
     
         new_population = []
-        new_population += self.getOffspring(population, fitnessProbs)
-        new_population += self.getSurvivers(population, fitnessProbs)
+        new_population += algorithm.getOffspring(population, fitnessProbs)
+        new_population += algorithm.getSurvivers(population, fitnessProbs, scores)
             
         # add new random members to fill the rest of the population.
-        self.addRandom(new_population)
+        algorithm.addRandom(new_population)
             
         # #replace the old population with a real copy
         # # population = copy.deepcopy(new_population)
@@ -233,67 +476,134 @@ class GeneticAlgorithm:
         new_generation = Generation(new_population, genNumber)
         
         namePopulation(new_population, genNumber)
-
-        return new_generation
-
     
-    def optimize(self):
+        return new_generation        
         
         
-        print('Generation 0')       
-        gen = 0
-        # Initialize the population 
-        IntialPop = initPopulation(self.Npopulation, self.genePool)
-        currentGen = Generation(IntialPop, gen)
-                
-        # Inialize the scores
-        currentGen.scores = self.scoreGen(currentGen)
-        currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
-        self.currentBestScore = np.min(currentGen.scores)
-        currentGen.recordBest()
-        self.best = currentGen.best
-        # self.checkIfBest(currentGen)
+def SaveGeneration():
+    pass
+    
+def loadGeneraton():
+    pass
 
-        for ii  in range(self.Ngen):
-            print('Generation ', ii + 1)
-           
-            # Record the old generation
-            if self.recordGens == True:
-                self.gens[ii] = currentGen
-            
-            # Get the new generatation
-            currentGen = self.getNewGen(currentGen, ii + 1)
-            
-            # Score the generation
-            currentGen.scores = self.scoreGen(currentGen)
-            currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
-            
-            # Record the best value int he current generation
-            currentGen.recordBest()
-            
-            # Record the best values
-            # self.recordBest(currentGen)
-            self.checkIfBest(currentGen)
-            
-            # Record the current solution
-            # currentBest = currentGen.best
-            # print(currentGen.best.genotype)
 
+
+        # self.currentGen = currentGen
+        # self.currentBest = currentGen.best
+
+
+# class optimize(self, Ngen, intialGen = None):
+    
+#     def __init__(self):
+#         pass
+#     # Intialize variables
+#     # self.Ngen = Ngen
+    
+    
+#     # Recorder
+#     if self.recordGens == True:
+#         self.gens = [None]*Ngen
+    
+#     # Parameters for recording the prior and current best
+#     self.currentBest = None
+#     self.genBestIndivduals = [None]*Ngen   # The best individual of the
+#     self.genBestValues  = [None]*Ngen   # The best individual of the
+    
+    
+#     self.cumBestValues = np.zeros(Ngen)
+#     self.cumBestGenotypes = [None]*Ngen        
+#     self.cumBestIndivduals = [None]*Ngen   # The total best individual
+#     # gens = [None]*self.Ngen
+    
+    
+    
+#     # Intialize population with a dumby generation
+#     print('Generation 0')       
+#     gen = 0
+
+#     if intialGen == None:
+#         # Initialize the population 
+#         IntialPop = initPopulation(self.Npop, self.genePool)
+#         currentGen = Generation(IntialPop, gen)
+#     else:
+#         currentGen = intialGen
             
-        # Score final generation
-        population = currentGen.population
+#     # Inialize the scores
+#     currentGen.scores = self.scoreGen(currentGen)
+#     currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
+#     self.currentBestScore = np.min(currentGen.scores)
+#     currentGen.setGenBest()
+    
+    
+#     self.currentBest = currentGen.best
+#     # self.checkIfBest(currentGen)
+
+#     for ii  in range(self.Ngen):
+#         print('Generation ', ii + 1)
+       
+#         # Record the old generation
+#         if self.recordGens == True:
+#             # gens[ii] = GenTester(currentGen)
+#             # gens[ii] = currentGen.population
+#             # gens[ii] = [1]
+#             self.gens[ii] = currentGen
+
+#         ## Generation
+#         # Get the next generatation
+#         currentGen = self.getNextGen(currentGen, ii + 1)
         
-        # print(currentGen.best.genotype)
-        return currentGen.best
+#         # Score the generation
+#         currentGen.scores = self.scoreGen(currentGen)
+#         currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
+
+#         # Record the best value int the current generation
+#         currentGen.setGenBest()
+                    
+#         self.genBestIndivduals[ii] = currentGen.best
         
+#         # Record the best values
+#         self.recordIfBest(currentGen)
         
+#         # Record the current solution
+#         # currentBest = currentGen.best
+#         # print(currentGen.best.genotype)
+        
+#         print('Current best score:', self.currentBestScore)    
+#         print('Current best genotype:', self.currentBest.genotype)    
+
+
+   
+#     # Score final generation
+#     # population = currentGen.population
+    
+#     # print(currentGen.best.genotype)
+#     return self.currentBest
+    
+
+
+
+
+
+
+
+
         
 def pickleAnalysis(geneticAlgorithm, fileName):
+
+    
+    # Delete the old object
+    if os.path.isfile(fileName):
+        os.remove(fileName)
+        print('Removing old file at: ', fileName)
     
     filehandler = open(fileName, 'wb')
+
+    
     try:
         pickle.dump(geneticAlgorithm, filehandler)
+        print('File Saved at: ', fileName)
     except:
+        print('Saving Failed.')
         pass
     filehandler.close()
     
@@ -301,7 +611,15 @@ def pickleAnalysis(geneticAlgorithm, fileName):
 def readPickle(fileName):
 
     fileObj = open(fileName, 'rb')
-    outputObject = pickle.load(fileObj)
+    outputObject = None
+    try:
+        outputObject = pickle.load(fileObj)
+        print('File Loaded at: ', fileName)
+    except:
+        print('Loading Failed.')
+    
     fileObj.close()
 
     return outputObject
+
+

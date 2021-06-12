@@ -36,11 +36,10 @@ class defaultEnvironment:
 
 def crossGene(genea, geneb):
     
-    # Nunits = len(genea)
     Nunits = max(len(genea), len(geneb))
     
     # pick a random cut point
-    cut = np.random.choice(np.arange(Nunits))   
+    cut = np.random.choice(np.arange(Nunits))
        
     # Concetenate makes a new object, no need for copies.
     aOut = np.concatenate([genea[:cut], geneb[cut:]])
@@ -50,7 +49,7 @@ def crossGene(genea, geneb):
     
     
     
-def defaultCrossover(a, b):
+def defaultCrossover(a: Individual, b: Individual):
     
     """
     This function generates a new solution by swaping parts of the genotype in 
@@ -79,6 +78,16 @@ def defaultCrossover(a, b):
         aOut[ii], bOut[ii] = crossGene(genotypea[ii], genotypeb[ii])
         
     return (Individual(aOut), Individual(bOut))
+
+
+def defaultFitness(individual, env):
+    """ In this case getting fitness from our result is trivial
+    """       
+    
+    fitness = individual.result
+    return fitness
+
+
 
 
 def mutateGene(individual, oldGene, tempGene, threshold):

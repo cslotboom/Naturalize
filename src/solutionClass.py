@@ -35,7 +35,7 @@ class Generation:
             
         return Genome
     
-    def recordBest(self):
+    def setGenBest(self):
         population = self.population
         scores = self.scores
     
@@ -47,17 +47,55 @@ class Generation:
     # def __getitem__(self, index):
     #     return self.Individuals[index]
 
+# class GenTester():
+#     def __init__(self, gen):
+        
+#         self.population = gen.population
+        # self.population = []
+        # self.size = gen.size
+        
+        # self.gen = gen.gen
+        # self.scores = gen.scores
+        # self.ranks = gen.ranks
+        # self.best = gen.best
+
+    # def getCurrentGenome(self):
+    #     Genome = [None]*self.size
+    #     for ii, individual in enumerate(self.population):
+    #         Genome[ii] = individual.genotype
+            
+    #     return Genome
+    
+    # def recordBest(self):
+    #     population = self.population
+    #     scores = self.scores
+    
+    #     # Record current Best
+    #     self.best = population[np.argmin(scores)]
+    #     self.bestScore = scores[np.argmin(scores)]
+    #     self.bestGenome = self.best.genotype   
+
+
+
 # =============================================================================
 # The default gene pool. The user may overwrite this with their own class
 # =============================================================================
 
 # TODO:
-    # What restrictions exist on genes? an they be any object
+    # What restrictions exist on genes? Can they be any object?
 
 
 # TODO:
     # Make the default genome a array of arrays.
 #   Can the default genome be a list of list??
+
+
+
+class GenePool:
+    
+    pass
+
+
 
 
 class DefaultGenePool:
@@ -80,8 +118,23 @@ class DefaultGenePool:
     def __init__(self, llims, ulims):
         """
         llims and ulims is a list of the bounds on each gene.
-        They are each a list Ngene big, that contains a np array of size of the gene
+        They support any objects that can be subtracted - Typically this will be
+        a float or numpy array.
+        
+        llims and ulims alternatively can be a single numpy array.
+        In this case it will be wrapped by a list.
+        
         """
+        # If the object isn't contained in a list
+        # This makes input cleaner
+        if isinstance(llims, list) != True:
+            llims = [llims]
+        if isinstance(ulims, list) != True:
+            ulims = [ulims]
+        else: 
+            print(not isinstance(llims, list))
+
+        
         self.llims = llims
         self.ulims = ulims
 

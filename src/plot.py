@@ -69,11 +69,12 @@ def plotAvgFitness(fig, ax, Analysis):
 
 def plotMinFitness(fig, ax, Analysis):
 
-    Ngen = Analysis.Ngen
-    scoreBest = np.zeros(Analysis.Ngen)
+    # Ngen = Analysis.Ngen
+    # scoreBest = np.zeros(Analysis.Ngen)
     
-    for ii in range(Ngen):              
-        scoreBest[ii] = np.min(Analysis.gens[ii].scores)
+    # for ii in range(Ngen):              
+    #     scoreBest[ii] = Analysis.genBestValues
+    scoreBest = Analysis.genBestValues
     
     ax.plot(scoreBest)
 
@@ -81,7 +82,7 @@ def plotMinFitness(fig, ax, Analysis):
 
 def plotTotalFitness(fig, ax, Analysis):
     BestOverTime = np.zeros(Analysis.Ngen)
-    BestOverTime = Analysis.BestValues
+    BestOverTime = Analysis.cumBestValues
     
     ax.plot(BestOverTime)
 
