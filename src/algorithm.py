@@ -5,6 +5,8 @@ Created on Sun Dec 20 18:43:11 2020
 @author: Christian
 """
 
+
+
 import os
 import numpy as np
 from .solutionClass import Individual, Generation, DefaultGenePool
@@ -151,7 +153,6 @@ class GeneticAlgorithm:
         pop = np.array(population)
         survivors = pop[Index]
             
-            
         return list(survivors)
 
     def addRandom(self, new_population):
@@ -197,128 +198,128 @@ class GeneticAlgorithm:
             
         return np.array(scores)    
 
-    def recordIfBest(self, generation):
-        """       
-        Checks if the best in the current generation is better than all priors 
-        stores it if it is.
-        """       
+    # def recordIfBest(self, generation):
+    #     """       
+    #     Checks if the best in the current generation is better than all priors 
+    #     stores it if it is.
+    #     """       
         
-        # TODO: Store genes, notindividual!
-            # Why? Storing the individual seems fine.
+    #     # TODO: Store genes, notindividual!
+    #         # Why? Storing the individual seems fine.
         
-        # self.genBestIndivduals = generation.best
+    #     # self.genBestIndivduals = generation.best
         
-        if generation.bestScore <= self.currentBestScore:
-            # If the current generation  is better, store the new best value
-            self.currentBest = generation.best
-            self.currentBestScore = generation.bestScore
+    #     if generation.bestScore <= self.currentBestScore:
+    #         # If the current generation  is better, store the new best value
+    #         self.currentBest = generation.best
+    #         self.currentBestScore = generation.bestScore
             
-            self.cumBestIndivduals[generation.gen - 1] = generation.best 
+    #         self.cumBestIndivduals[generation.gen - 1] = generation.best 
         
-        # If it's the first generation, store the value no matter what.
-        elif generation.gen == 0:
-            self.cumBestIndivduals[generation.gen - 1] = generation.best
+    #     # If it's the first generation, store the value no matter what.
+    #     elif generation.gen == 0:
+    #         self.cumBestIndivduals[generation.gen - 1] = generation.best
             
-        # if the current score isn't bigger, store the old one.
-        else:
-            self.cumBestIndivduals[generation.gen - 1] = self.cumBestIndivduals[generation.gen - 2] 
+    #     # if the current score isn't bigger, store the old one.
+    #     else:
+    #         self.cumBestIndivduals[generation.gen - 1] = self.cumBestIndivduals[generation.gen - 2] 
         
-        # Store the current best score.
-        self.genBestValues[generation.gen - 1] = generation.bestScore
-        self.cumBestValues[generation.gen - 1] = self.currentBestScore 
-        # self.genBestValue[generation.gen - 1] = self.currentBestScore 
-        # self.cumtValues[generation.gen - 1] = self.currentBestScore 
+    #     # Store the current best score.
+    #     self.genBestValues[generation.gen - 1] = generation.bestScore
+    #     self.cumBestValues[generation.gen - 1] = self.currentBestScore 
+    #     # self.genBestValue[generation.gen - 1] = self.currentBestScore 
+    #     # self.cumtValues[generation.gen - 1] = self.currentBestScore 
 
-    def optimize(self, Ngen, intialGen = None):
+    # def optimize(self, Ngen, intialGen = None):
         
-        # Intialize variables
-        self.Ngen = Ngen
+    #     # Intialize variables
+    #     self.Ngen = Ngen
 
-        """
-        intiailizes recording variables.
-        """
-        # Recorder
-        if self.recordGens == True:
-            self.gens = [None]*Ngen
+    #     """
+    #     intiailizes recording variables.
+    #     """
+    #     # Recorder
+    #     if self.recordGens == True:
+    #         self.gens = [None]*Ngen
         
-        # Parameters for recording the prior and current best
-        self.currentBest = None
-        self.genBestIndivduals = [None]*Ngen   # The best individual of the
-        self.genBestValues  = [None]*Ngen   # The best individual of the
+    #     # Parameters for recording the prior and current best
+    #     self.currentBest = None
+    #     self.genBestIndivduals = [None]*Ngen   # The best individual of the
+    #     self.genBestValues  = [None]*Ngen   # The best individual of the
         
         
-        self.cumBestValues = np.zeros(Ngen)
-        self.cumBestGenotypes = [None]*Ngen        
-        self.cumBestIndivduals = [None]*Ngen   # The total best individual
-        # gens = [None]*self.Ngen
+    #     self.cumBestValues = np.zeros(Ngen)
+    #     self.cumBestGenotypes = [None]*Ngen        
+    #     self.cumBestIndivduals = [None]*Ngen   # The total best individual
+    #     # gens = [None]*self.Ngen
                 
-        # Intialize population with a dumby generation
-        print('Generation 0')       
-        gen = 0
+    #     # Intialize population with a dumby generation
+    #     print('Generation 0')       
+    #     gen = 0
 
-        if intialGen == None:
-            # Initialize the population 
-            IntialPop = initPopulation(self.Npop, self.genePool)
-            currentGen = Generation(IntialPop, gen)
-        else:
-            currentGen = intialGen
+    #     if intialGen == None:
+    #         # Initialize the population 
+    #         IntialPop = initPopulation(self.Npop, self.genePool)
+    #         currentGen = Generation(IntialPop, gen)
+    #     else:
+    #         currentGen = intialGen
         
-        """
-        Gets the score of the generation
-        """
+    #     """
+    #     Gets the score of the generation
+    #     """
         
         
-        # Inialize the scores
-        currentGen.scores = self.scoreGen(currentGen)
-        currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
-        self.currentBestScore = np.min(currentGen.scores)
-        currentGen.setGenBest()
+    #     # Inialize the scores
+    #     currentGen.scores = self.scoreGen(currentGen)
+    #     currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
+    #     self.currentBestScore = np.min(currentGen.scores)
+    #     currentGen.setGenBest()
         
-        self.currentGen = currentGen
-        self.currentBest = currentGen.best
-        # self.checkIfBest(currentGen)
+    #     self.currentGen = currentGen
+    #     self.currentBest = currentGen.best
+    #     # self.checkIfBest(currentGen)
 
-        for ii  in range(self.Ngen):
-            self.analyzeGeneration(ii)
+    #     for ii  in range(self.Ngen):
+    #         self.analyzeGeneration(ii)
 
-        return self.currentBest
+    #     return self.currentBest
 
 
-    def analyzeGeneration(self, ii: int):
-        print('Generation ', ii + 1)
-        currentGen = self.currentGen
+    # def analyzeGeneration(self, ii: int):
+    #     print('Generation ', ii + 1)
+    #     currentGen = self.currentGen
        
-        # Record the old generation
-        if self.recordGens == True:
-            self.gens[ii] = currentGen
+    #     # Record the old generation
+    #     if self.recordGens == True:
+    #         self.gens[ii] = currentGen
 
-        ## Generation
-        # Get the next generatation
-        currentGen = getNextGen(self, currentGen, ii + 1)
+    #     ## Generation
+    #     # Get the next generatation
+    #     currentGen = getNextGen(self, currentGen, ii + 1)
         
-        # Score the generation
-        currentGen.scores = self.scoreGen(currentGen)
-        currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
+    #     # Score the generation
+    #     currentGen.scores = self.scoreGen(currentGen)
+    #     currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
         
-        ## Record
-        # Record the best value int the current generation
-        currentGen.setGenBest()
+    #     ## Record
+    #     # Record the best value int the current generation
+    #     currentGen.setGenBest()
                     
-        self.genBestIndivduals[ii] = currentGen.best
+    #     self.genBestIndivduals[ii] = currentGen.best
         
-        # Record the best values
-        self.recordIfBest(currentGen)
+    #     # Record the best values
+    #     self.recordIfBest(currentGen)
         
-        # Record the current solution
-        # currentBest = currentGen.best
-        # print(currentGen.best.genotype)
+    #     # Record the current solution
+    #     # currentBest = currentGen.best
+    #     # print(currentGen.best.genotype)
         
-        # Update the generation
-        self.currentGen = currentGen        
+    #     # Update the generation
+    #     self.currentGen = currentGen        
         
-        # TODO: move print to recorder.
-        print('Current best score:', self.currentBestScore)    
-        print('Current best genotype:', self.currentBest.genotype)    
+    #     # TODO: move print to recorder.
+    #     print('Current best score:', self.currentBestScore)    
+    #     print('Current best genotype:', self.currentBest.genotype)    
 
     def initPopulation(self):
         
@@ -363,7 +364,7 @@ class Analysis():
    
         self.algorithm = algorithm
         self.recorder = recorder
-        self.printStatus = False
+        self.printStatus = printStatus
         
         self.genCount = 0
         self.currentGen = None
@@ -413,30 +414,43 @@ class Analysis():
             self.recorder.record(self.currentGen)
     
     
-    def runAnalysis(self, Ngen, intialGen = None, printStatus = True):
+    def runAnalysis(self, Ngen, intialGen = None):
         
         # Intialize variables
         self.Ngen = Ngen
-        if intialGen == None:
+        
+        # If it's the first generation, and no generation is supplied, make one.
+        if self.genCount == 0 and intialGen == None:
             self.initGeneration()
             self.record()
+        
 
         for ii in range(self.Ngen):
             newGen = self.getNextGen()            
             self.analyzeGeneration(newGen)
-            
             self.record()
-
-        return self.currentBest        
+        
+        return self.smartReturn()
+        # return self.currentBest        
+    
+    
+    def smartReturn(self):
+        """
+        If the the genotype is trivial (only one gene), then we return an array
+        of that gene only.
+        """
+        if len(self.currentBest) == 1:
+            return self.currentBest[0]
+        return self.currentBest
+        
+    
     
     def analyzeGeneration(self, newGen):
         self.genCount += 1
         
-        print(f'Generation {self.genCount}')
-       
-        ## Get a new generation
-
-        
+        if self.printStatus:
+            print(f'Generation {self.genCount}')
+               
         # Score the generation
         # self.algorithm.scoreGen(currentGen)
         newGen.scores = self.algorithm.scoreGen(newGen)
@@ -445,7 +459,6 @@ class Analysis():
         
         self.currentGen = newGen       
         self.currentBest = newGen.best.genotype
-        
         
         
     def getNextGen(self):
@@ -471,14 +484,18 @@ class Analysis():
         algorithm.addRandom(new_population)
             
         # #replace the old population with a real copy
-        # # population = copy.deepcopy(new_population)
-        # population = new_population
         new_generation = Generation(new_population, genNumber)
         
         namePopulation(new_population, genNumber)
     
         return new_generation        
         
+    
+    def getRecorderData(self):
+        """ Fixe the data for processing, then return it."""
+        self.recorder.data.convert()
+        return self.recorder.data
+    
         
 def SaveGeneration():
     pass
@@ -492,134 +509,7 @@ def loadGeneraton():
         # self.currentBest = currentGen.best
 
 
-# class optimize(self, Ngen, intialGen = None):
-    
-#     def __init__(self):
-#         pass
-#     # Intialize variables
-#     # self.Ngen = Ngen
-    
-    
-#     # Recorder
-#     if self.recordGens == True:
-#         self.gens = [None]*Ngen
-    
-#     # Parameters for recording the prior and current best
-#     self.currentBest = None
-#     self.genBestIndivduals = [None]*Ngen   # The best individual of the
-#     self.genBestValues  = [None]*Ngen   # The best individual of the
-    
-    
-#     self.cumBestValues = np.zeros(Ngen)
-#     self.cumBestGenotypes = [None]*Ngen        
-#     self.cumBestIndivduals = [None]*Ngen   # The total best individual
-#     # gens = [None]*self.Ngen
-    
-    
-    
-#     # Intialize population with a dumby generation
-#     print('Generation 0')       
-#     gen = 0
-
-#     if intialGen == None:
-#         # Initialize the population 
-#         IntialPop = initPopulation(self.Npop, self.genePool)
-#         currentGen = Generation(IntialPop, gen)
-#     else:
-#         currentGen = intialGen
-            
-#     # Inialize the scores
-#     currentGen.scores = self.scoreGen(currentGen)
-#     currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
-#     self.currentBestScore = np.min(currentGen.scores)
-#     currentGen.setGenBest()
-    
-    
-#     self.currentBest = currentGen.best
-#     # self.checkIfBest(currentGen)
-
-#     for ii  in range(self.Ngen):
-#         print('Generation ', ii + 1)
-       
-#         # Record the old generation
-#         if self.recordGens == True:
-#             # gens[ii] = GenTester(currentGen)
-#             # gens[ii] = currentGen.population
-#             # gens[ii] = [1]
-#             self.gens[ii] = currentGen
-
-#         ## Generation
-#         # Get the next generatation
-#         currentGen = self.getNextGen(currentGen, ii + 1)
-        
-#         # Score the generation
-#         currentGen.scores = self.scoreGen(currentGen)
-#         currentGen.fitnessProbs = self.getfitnessProbs(currentGen.scores)
-
-#         # Record the best value int the current generation
-#         currentGen.setGenBest()
-                    
-#         self.genBestIndivduals[ii] = currentGen.best
-        
-#         # Record the best values
-#         self.recordIfBest(currentGen)
-        
-#         # Record the current solution
-#         # currentBest = currentGen.best
-#         # print(currentGen.best.genotype)
-        
-#         print('Current best score:', self.currentBestScore)    
-#         print('Current best genotype:', self.currentBest.genotype)    
 
 
-   
-#     # Score final generation
-#     # population = currentGen.population
-    
-#     # print(currentGen.best.genotype)
-#     return self.currentBest
-    
-
-
-
-
-
-
-
-
-        
-def pickleAnalysis(geneticAlgorithm, fileName):
-
-    
-    # Delete the old object
-    if os.path.isfile(fileName):
-        os.remove(fileName)
-        print('Removing old file at: ', fileName)
-    
-    filehandler = open(fileName, 'wb')
-
-    
-    try:
-        pickle.dump(geneticAlgorithm, filehandler)
-        print('File Saved at: ', fileName)
-    except:
-        print('Saving Failed.')
-        pass
-    filehandler.close()
-    
-    
-def readPickle(fileName):
-
-    fileObj = open(fileName, 'rb')
-    outputObject = None
-    try:
-        outputObject = pickle.load(fileObj)
-        print('File Loaded at: ', fileName)
-    except:
-        print('Loading Failed.')
-    
-    fileObj.close()
-
-    return outputObject
 
 

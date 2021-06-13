@@ -84,8 +84,7 @@ def defaultFitness(individual, env):
     """ In this case getting fitness from our result is trivial
     """       
     
-    fitness = individual.result
-    return fitness
+    return individual.result
 
 
 

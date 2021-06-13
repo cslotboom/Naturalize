@@ -1,3 +1,5 @@
 from .algorithm import *
 from .plot import *
-from .recorder import Recorder, saveCurrentGen, readSavedGen
+from .recorder import basicRecorder, saveCurrentGen, readSavedGen
+
+from .postprocess import *

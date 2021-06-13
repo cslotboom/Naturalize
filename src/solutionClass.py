@@ -125,7 +125,7 @@ class DefaultGenePool:
         In this case it will be wrapped by a list.
         
         """
-        # If the object isn't contained in a list
+        # If the object isn't contained in a list, make it a list
         # This makes input cleaner
         if isinstance(llims, list) != True:
             llims = [llims]

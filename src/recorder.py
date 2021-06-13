@@ -22,7 +22,7 @@ import pickle
 
 
 # The 
-
+np.ndarray
 
 
 """
@@ -34,15 +34,38 @@ class dataContainer:
     
     
     def __init__(self):
-        self.genBestIndivduals = []  # The best individual of the current generation
-        self.genBestGenotypes = []        
-        self.genBestValues  = []     
         
-        self.AvgScore = []
+        """
+        When recording we use lists because it is much quicker to append data
+        to them.
+        """
+        
+        self.bestIndivduals = []  # The best individual of the current generation
+        self.bestGenotypes = []        
+        self.bestScores  = []
+        self.genNumber = []
+        self.populations = []
+        
     def getAvgScore(self,gen):
         
         pass
 
+    def convert(self):
+    
+        """
+        This might be a terrible terrible practice, but I'm testing it out because
+        I'm brave.
+        
+        Convers all curent attributes to a np array.
+        """
+        for item in self.__dict__:
+            if isinstance(self.__dict__[item], list):
+                self.__dict__[item] = np.array(self.__dict__[item])
+        
+# test = dataContainer()
+# for item in test.__dict__:
+#     print(item)
+#     print(test.__dict__[item])
 
 class generationData():
     
@@ -55,25 +78,22 @@ class generationData():
 
 
 
-class Recorder():
+class basicRecorder():
     
     
     def __init__(self, Nrecord: int, Nstore: int):
         
-        self.container = dataContainer
+        self.data = dataContainer()
         
         self.Nrecord = Nrecord
         self.Nstore = Nstore
-        # self.currentBestScore = 0
         
-        # self.gens = []
         self.genNumber = []
         
         # Parameters for recording the prior and current best
-        # self.currentBest
         self.bestIndivduals = []  # The best individual of the current generation
         self.bestGenotypes = []        
-        self.bestValues  = []   # The best individual of the
+        self.bestScores  = []   # The best individual of the
 
 
         self.populations = []
@@ -82,28 +102,38 @@ class Recorder():
         # self.avgbest = []
 
     def shouldRecord(self, N):
+        """
+        Checks if the current generation should be recorded.
+        """
         
         if N% self.Nrecord ==0:
             return True
         return False
 
 
-
     def recordBestAbsolute(self, currentGen):
+        """
+        Records the single best geontype, individual and value
+        """
 
-        self.bestIndivduals.append(currentGen.best)
-        self.bestGenotypes.append(currentGen.best.genotype)
-        self.bestValues.append(currentGen.bestScore)
+        self.data.bestIndivduals.append(currentGen.best)
+        self.data.bestGenotypes.append(currentGen.best.genotype)
+        self.data.bestScores.append(currentGen.bestScore)
 
 
     def recordBestPool(self, currentGen):
+        """
+        Records the best Nstore individuals of the current generation in
+        a population.
+        """
+
         # Record a pool
         # Sort the indexes, keep the best Nstore of them        
         keepInexes  = np.argsort(currentGen.scores)[:self.Nstore]
         tempPop     = np.array(currentGen.population)
         
         storedIndividuals = tempPop[keepInexes]
-        self.populations.append(storedIndividuals)
+        self.data.populations.append(storedIndividuals)
         
         
 
@@ -113,43 +143,10 @@ class Recorder():
             return
                     
         # Record the best of each generation
-        self.genNumber.append(currentGen.gen)
-
-        # Record the absolute best
+        self.data.genNumber.append(currentGen.gen)
         self.recordBestAbsolute(currentGen)
-
         self.recordBestPool(currentGen)
 
-        
-        # tempScores = np.zeros(self.Nstore)
-        # for ii in range(self.Nstore):
-        #     tempScores[ii] = storedIndividuals[ii].result
-        
-        # self.avgbest.append( np.average(tempScores))
-        
-    
-        
-    # def get
-        
-        # stor.append
-        # storedIndividuals = 
-        # storedScores = sortedScore[:self.Nstore]
-        
-        # bestScores = 
-        
-        
-        # self.avgBest = argsort()
-        
-        
-        # Check if better than the old best value, record if not
-        # recordIfBest(currentGen)
-        
-        # scores = currentGen.scores
-        
-        # storedGenomes = [None]*self.Nstore
-        
-        # for ii in range(self.Nstore):
-        #     pass
             
         
     def recordIfBest(self, generation):
@@ -175,8 +172,8 @@ class Recorder():
             self.cumBestIndivduals[generation.gen - 1] = self.cumBestIndivduals[generation.gen - 2] 
         
         # Store the current best score.
-        self.genBestValues[generation.gen - 1] = generation.bestScore
-        self.cumBestValues[generation.gen - 1] = self.currentBestScore         
+        self.genBestScores[generation.gen - 1] = generation.bestScore
+        self.cumBestScores[generation.gen - 1] = self.currentBestScore         
         
         
         
@@ -237,10 +234,13 @@ def _geneToStr(gene):
 
 def _getTxtOut(genNumber, flatGenes, Lgenes):
     
+    """
+    Writes out the generation data as text.
+    """
+    
     lines = []
     header = f'Data from generation: {genNumber}\n'
     lines.append(header)
-    
     lines.append('Gene Lengths:\n')
     
     header2 = []
@@ -257,6 +257,12 @@ def _getTxtOut(genNumber, flatGenes, Lgenes):
 
 def saveCurrentGen(analysis, fileName):
     
+    """
+    Note, some rounding occurs when saving to .txt! THis may affect really sensetive
+    results.
+    """
+    
+    
     currentGen = analysis.currentGen
     
     population = currentGen.population
@@ -264,7 +270,6 @@ def saveCurrentGen(analysis, fileName):
     Npop = len(population)
     
     indv = population[0]
-    # Ngenes = len(indv.genotype)
     Lgenes = []
     for gene in indv.genotype:
         Lgenes.append(len(gene))
