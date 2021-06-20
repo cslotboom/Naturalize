@@ -11,19 +11,14 @@ import os
 import numpy as np
 from .solutionClass import Individual, Generation, DefaultGenePool
 
-# from .defaultFuncs import (initPopulation, defaultEnvironment, 
-#                            defaultCrossover, defaultMutate, 
-#                            defaultFitnessProbs, pick_Individual, 
-#                            namePopulation)
-import pickle 
 
+import pickle 
+import time
 # from .
 
 
 
 # The 
-np.ndarray
-
 
 """
 Get the cumulative best using another parser function
@@ -33,18 +28,20 @@ Get the cumulative best using another parser function
 class dataContainer:
     
     
-    def __init__(self):
+    def __init__(self, size = 1):
         
         """
         When recording we use lists because it is much quicker to append data
         to them.
         """
-        
-        self.bestIndivduals = []  # The best individual of the current generation
-        self.bestGenotypes = []        
+        # The best individual of the current generation
+        self.bestIndivduals = []
+        self.bestGenotypes = []    
         self.bestScores  = []
         self.genNumber = []
         self.populations = []
+        self.populationBestScores = []
+        
         
     def getAvgScore(self,gen):
         
@@ -75,42 +72,46 @@ class generationData():
 
 # The recorder object should have rules for recording the current generation
 
+"""
+This is tightly coupled to the individual object and generation objects
 
-
-
-class basicRecorder():
+"""
+class Recorder():
     
-    
-    def __init__(self, Nrecord: int, Nstore: int):
-        
-        self.data = dataContainer()
-        
+    def __init__(self, Nrecord: int, Nstore:int = 1):
+
         self.Nrecord = Nrecord
-        self.Nstore = Nstore
-        
-        self.genNumber = []
-        
-        # Parameters for recording the prior and current best
-        self.bestIndivduals = []  # The best individual of the current generation
-        self.bestGenotypes = []        
-        self.bestScores  = []   # The best individual of the
-
-
-        self.populations = []
-        
-        
-        # self.avgbest = []
+        self.Nstore = Nstore        
+        self.data = dataContainer()
 
     def shouldRecord(self, N):
         """
         Checks if the current generation should be recorded.
         """
-        
-        if N% self.Nrecord ==0:
+        if (N)% self.Nrecord ==0:
             return True
         return False
+    
+    @staticmethod
+    def record(self):
+        'empty'
 
 
+
+
+class basicRecorder(Recorder):
+
+    def record(self, currentGen):
+        
+        if self.shouldRecord(currentGen.gen) == False:
+            return
+                    
+        # Record the best of each generation
+        self.data.genNumber.append(currentGen.gen)
+        self.recordBestAbsolute(currentGen)
+        self.recordBestPool(currentGen)
+        
+        
     def recordBestAbsolute(self, currentGen):
         """
         Records the single best geontype, individual and value
@@ -126,17 +127,26 @@ class basicRecorder():
         Records the best Nstore individuals of the current generation in
         a population.
         """
-
         # Record a pool
-        # Sort the indexes, keep the best Nstore of them        
+        # Sort the indexes, keep the best Nstore of them     
+        
+        
         keepInexes  = np.argsort(currentGen.scores)[:self.Nstore]
         tempPop     = np.array(currentGen.population)
         
         storedIndividuals = tempPop[keepInexes]
+        # time.sleep(.0001)
         self.data.populations.append(storedIndividuals)
-        
+        self.data.populationBestScores.append(currentGen.scores[keepInexes])
         
 
+
+
+class liteRecorder(Recorder):
+    
+    def __init__(self, Nrecord: int):
+        super().__init__(Nrecord)
+            
     def record(self, currentGen):
         
         if self.shouldRecord(currentGen.gen) == False:
@@ -145,67 +155,16 @@ class basicRecorder():
         # Record the best of each generation
         self.data.genNumber.append(currentGen.gen)
         self.recordBestAbsolute(currentGen)
-        self.recordBestPool(currentGen)
-
-            
-        
-    def recordIfBest(self, generation):
-        """       
-        Checks if the best in the current generation is better than all priors 
-        stores it if it is.
-        """       
-
-        
-        if generation.bestScore <= self.currentBestScore:
-            # If the current generation  is better, store the new best value
-            self.currentBest = generation.best
-            self.currentBestScore = generation.bestScore
-            
-            self.cumBestIndivduals[generation.gen - 1] = generation.best 
-        
-        # If it's the first generation, store the value no matter what.
-        elif generation.gen == 0:
-            self.cumBestIndivduals[generation.gen - 1] = generation.best
-            
-        # if the current score isn't bigger, store the old one.
-        else:
-            self.cumBestIndivduals[generation.gen - 1] = self.cumBestIndivduals[generation.gen - 2] 
-        
-        # Store the current best score.
-        self.genBestScores[generation.gen - 1] = generation.bestScore
-        self.cumBestScores[generation.gen - 1] = self.currentBestScore         
         
         
-        
-    # self.bestScores
-    # self.avgScore
+    def recordBestAbsolute(self, currentGen):
+        """
+        Records the single best geontype, individual and value
+        """
 
-
-    ## Record
-    # Record the best value int the current generation
-    # currentGen.recordGenBest()
-                
-    # self.genBestIndivduals[self.currentGen] = currentGen.best
-    
-    # Record the best values
-    # self.recordIfBest(currentGen)
-    
-    # Record the current solution
-    # currentBest = currentGen.best
-    # print(currentGen.best.genotype)
-    
-    # Update the generation
-    
-    # TODO: move print to recorder.
-    # print('Current best score:', self.currentBestScore)    
-    # print('Current best genotype:', self.currentBest.genotype)   
-
-
-
-
-        # self.currentGen = currentGen
-        # self.currentBest = currentGen.best
-
+        # self.data.bestIndivduals.append(currentGen.best)
+        # self.data.bestGenotypes.append(currentGen.best.genotype)
+        self.data.bestScores.append(currentGen.bestScore)       
 
 
 

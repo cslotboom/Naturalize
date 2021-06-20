@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 class dataReader():
     
-    def __init__(self,data, function):
+    def __init__(self, data, function):
         """
         A generic way of getting the output from our datastructure.
         
@@ -111,11 +111,14 @@ def getGeneAvg(population, Npop, indGeontype, indGene):
 
 def plotAvgScore(data):
     
-    reader = dataReader(data, getPopAvg)
-    avg = reader.get()
+    #Check data??
     
+    # reader = dataReader(data, getPopAvg)
+    # avg = reader.get()
+    avg = np.average(data.populationBestScores, 1)
+    x = data.genNumber
    
-    line = plt.plot(avg)
+    line = plt.plot(x, avg)
     return line
 
 

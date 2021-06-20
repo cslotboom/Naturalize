@@ -5,7 +5,7 @@ Created on Sun Dec 20 18:43:11 2020
 @author: Christian
 """
 import numpy as np
-
+import hysteresis
 # =============================================================================
 # Generation/Population
 # =============================================================================
@@ -93,7 +93,28 @@ class Generation:
 
 class GenePool:
     
-    pass
+    def __init__(self, llims, ulims):
+        """
+        llims and ulims is a list of the bounds on each gene.
+        They support any objects that can be subtracted - Typically this will be
+        a float or numpy array.
+        
+        llims and ulims alternatively can be a single numpy array.
+        In this case it will be wrapped by a list.
+        
+        """
+        # If the object isn't contained in a list, make it a list
+        # This makes input cleaner
+        if isinstance(llims, list) != True:
+            llims = [llims]
+        if isinstance(ulims, list) != True:
+            ulims = [ulims]
+        else: 
+            print(not isinstance(llims, list))
+
+        
+        self.llims = llims
+        self.ulims = ulims
 
 
 
@@ -132,7 +153,8 @@ class DefaultGenePool:
         if isinstance(ulims, list) != True:
             ulims = [ulims]
         else: 
-            print(not isinstance(llims, list))
+            pass
+            # print(not isinstance(llims, list))
 
         
         self.llims = llims
@@ -155,10 +177,69 @@ class DefaultGenePool:
         
             lbounds = self.llims[ii]
             ubounds = self.ulims[ii]
+            # rand = np.random.random(Ngenes)
+            # genotype.append(self.getGene(rand, lbounds,ubounds ))
+            rand = np.random.random(len(lbounds))
+            genotype.append(self.getGene(rand, lbounds,ubounds ))
+            
+            
+        
+        return genotype
+
+
+
+
+
+class deepGenePool:
+    
+    """
+    The gene pool is used to represent a gene pool where genes have 
+    
+    random values will be assigned to each individual gene group
+    
+    A gene pool is a reflection of all current genes. It differes from the 
+    environment in that the genes change through the analysis.
+    
+    The environment is static!
+    Perhaps the methods of generating genes should be in the environment?
+    
+    This default gene pool selects valid solutions from a uniform distribution
+    between two different limits.
+       
+    """
+    
+    # Generates valid solutions for each individual genom
+    def __init__(self, llims, ulims):
+        self.super().__init(llims, ulims)
+
+    def getGene(self, rand, lbounds, ubounds):
+        
+        dx = ubounds - lbounds
+        gene = dx*rand + lbounds
+        return gene
+    
+    def getGenotype(self):
+        """
+        Gets all genes and stores it in a container
+        """
+        
+        Ngenes = len(self.llims)
+        genotype = []
+        for ii in range(Ngenes):
+        
+            lbounds = self.llims[ii]
+            ubounds = self.ulims[ii]
             rand = np.random.random(Ngenes)
             genotype.append(self.getGene(rand, lbounds,ubounds ))
         
         return genotype
+
+
+
+
+
+
+
 
 
 # =============================================================================
