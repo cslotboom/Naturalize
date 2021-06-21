@@ -5,6 +5,9 @@ Naturalize is a Python genetic algorithm solver for generic optimization problem
 
 Naturalize is in beta testing. This means that the solver is stable, but significant changes may occur to the function names or API. Comments welcome!
 
+# List of open questions:
+- How to speed up the convergence for image matching? The convergence occurs very slowly for the final generations.
+
 # Examples of problems solved using Naturalize
 Math equations (Ex 1.)
 Travelling salesman problem (Ex 2.)
