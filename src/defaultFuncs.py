@@ -34,7 +34,7 @@ class defaultEnvironment:
 
 
 
-def crossGene(genea, geneb):
+def crossGeneSingeCut(genea, geneb):
     
     Nunits = max(len(genea), len(geneb))
     
@@ -48,6 +48,19 @@ def crossGene(genea, geneb):
     return aOut, bOut
     
     
+def crossGeneAvg(genea, geneb):
+    
+    Nunits = max(len(genea), len(geneb))
+    
+    # pick a random cut point
+    cut = np.random.choice(np.arange(Nunits))
+       
+    # Concetenate makes a new object, no need for copies.
+    avg = np.average([geneb[cut:],genea[cut:]])
+    aOut = np.concatenate([genea[:cut], avg])
+    bOut = np.concatenate([geneb[:cut], avg])
+    
+    return aOut, bOut
     
 def defaultCrossover(a: Individual, b: Individual):
     
@@ -75,7 +88,7 @@ def defaultCrossover(a: Individual, b: Individual):
     bOut = [None]*Ngenes
     
     for ii in range(Ngenes):
-        aOut[ii], bOut[ii] = crossGene(genotypea[ii], genotypeb[ii])
+        aOut[ii], bOut[ii] = crossGeneSingeCut(genotypea[ii], genotypeb[ii])
         
     return (Individual(aOut), Individual(bOut))
 
@@ -150,6 +163,22 @@ def defaultMutate(individual, threshold, GenePool):
 Thes functions are used to work with individual containers
 """
 
+def _rankFitness(scores, Npop):
+    # find wich scores should be combined
+    # Scores with a low fitness should be combined at higher probability
+      
+    populationRanks = np.zeros(Npop)
+    # print(scores)
+    # sort the array, then create an array of ranks
+    sortedIndexes = scores.argsort()    
+    populationRanks[sortedIndexes] = np.arange(Npop)
+
+    # the inverse of the fitness rank
+    # return Npop - populationRanks
+    return populationRanks
+
+# def _getRouleteArea
+
 def defaultFitnessProbs(scores):
     
     """
@@ -166,20 +195,12 @@ def defaultFitnessProbs(scores):
     
     
     """
+    Npop = len(scores) 
+    populationRanks = _rankFitness(scores, Npop)
     
-    # find wich scores should be combined
-    # Scores with a low fitness should be combined at higher probability
-    Npop = len(scores)   
-    populationRanks = np.zeros(Npop)
-    # print(scores)
-    # sort the array, then create an array of ranks
-    sortedIndexes = scores.argsort()    
-    populationRanks[sortedIndexes] = np.arange(Npop)
-
-    # the inverse of the fitness rank
-    rankedFitness = Npop - populationRanks
     
-    cumulativeFitness = np.cumsum(rankedFitness)
+    wheelAreas = Npop - populationRanks
+    cumulativeFitness = np.cumsum(wheelAreas)
     probs = cumulativeFitness / cumulativeFitness[-1]
     
     return probs

@@ -9,7 +9,7 @@ Created on Sun Dec 20 18:43:11 2020
 
 import os
 import numpy as np
-from .solutionClass import Individual, Generation, DefaultGenePool
+from .solutionClass import Individual, Generation, BasicGenePool
 
 from .defaultFuncs import (initPopulation, defaultEnvironment, 
                            defaultCrossover, defaultMutate, defaultFitness,
@@ -24,11 +24,38 @@ class AlgorithmHelper:
     """
     
     def __init__(self, ftest, ffit = defaultFitness, 
-                 genePool = DefaultGenePool,   
+                 genePool = BasicGenePool,   
                  fmut = defaultMutate, 
                  fcross = defaultCrossover, 
                  fprobs = defaultFitnessProbs,
                  environment = defaultEnvironment()):
+        """
+        The algorithm helper is used to pass functions to the genetic algorithm.
+        The user can set custom f
+
+        Parameters
+        ----------
+        ftest : TYPE
+            DESCRIPTION.
+        ffit : TYPE, optional
+            DESCRIPTION. The default is defaultFitness.
+        genePool : TYPE, optional
+            DESCRIPTION. The default is DefaultGenePool.
+        fmut : TYPE, optional
+            DESCRIPTION. The default is defaultMutate.
+        fcross : TYPE, optional
+            DESCRIPTION. The default is defaultCrossover.
+        fprobs : TYPE, optional
+            DESCRIPTION. The default is defaultFitnessProbs.
+        environment : TYPE, optional
+            DESCRIPTION. The default is defaultEnvironment().
+
+        Returns
+        -------
+        None.
+
+        """
+        
         
         self.ftest = ftest
         self.ffit = ffit
@@ -187,13 +214,16 @@ class GeneticAlgorithm:
     def score_population(self, population):
         # Find scores for every item of hte pupulation
         
-        scores = []
-        
+        scores = np.zeros(len(population))
         for ii in range(len(population)):
-            score = self.fitness(population[ii], self.environment)
-            scores += [score]
+            # score = self.fitness(population[ii], self.environment)
+            # scores += [score]     
+      
+            scores[ii] = self.fitness(population[ii], self.environment)
+            if scores[ii] == 1.:
+                pause = True      
             
-        return np.array(scores)    
+        return scores   
 
     def initPopulation(self):
         
@@ -253,7 +283,8 @@ class Analysis():
         currentGen =  self.currentGen
         
         # Inialize the scores
-        currentGen.scores = self.algorithm.scoreGen(currentGen)
+        # currentGen.scores = self.algorithm.scoreGen(currentGen)
+        self.algorithm.scoreGen(currentGen)
         currentGen.fitnessProbs = self.algorithm.getfitnessProbs(currentGen.scores)
         
         # Record the best value int the current generation

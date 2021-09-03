@@ -9,7 +9,7 @@ Created on Sun Dec 20 18:43:11 2020
 import forallpeople
 import os
 import numpy as np
-from .solutionClass import Individual, Generation, DefaultGenePool
+from .solutionClass import Individual, Generation, BasicGenePool
 
 
 import pickle 
@@ -35,7 +35,7 @@ class dataContainer:
         to them.
         """
         # The best individual of the current generation
-        self.bestIndivduals = []
+        self.bestIndividuals = []
         self.bestGenotypes = []    
         self.bestScores  = []
         self.genNumber = []
@@ -117,7 +117,7 @@ class basicRecorder(Recorder):
         Records the single best geontype, individual and value
         """
 
-        self.data.bestIndivduals.append(currentGen.best)
+        self.data.bestIndividuals.append(currentGen.best)
         self.data.bestGenotypes.append(currentGen.best.genotype)
         self.data.bestScores.append(currentGen.bestScore)
 

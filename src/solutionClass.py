@@ -119,7 +119,7 @@ class GenePool:
 
 
 
-class DefaultGenePool:
+class BasicGenePool:
     
     """
     The gene pool generates valid "genes" or solutions.
@@ -190,49 +190,49 @@ class DefaultGenePool:
 
 
 
-class deepGenePool:
+# class deepGenePool:
     
-    """
-    The gene pool is used to represent a gene pool where genes have 
+#     """
+#     The gene pool is used to represent a gene pool where genes have 
     
-    random values will be assigned to each individual gene group
+#     random values will be assigned to each individual gene group
     
-    A gene pool is a reflection of all current genes. It differes from the 
-    environment in that the genes change through the analysis.
+#     A gene pool is a reflection of all current genes. It differes from the 
+#     environment in that the genes change through the analysis.
     
-    The environment is static!
-    Perhaps the methods of generating genes should be in the environment?
+#     The environment is static!
+#     Perhaps the methods of generating genes should be in the environment?
     
-    This default gene pool selects valid solutions from a uniform distribution
-    between two different limits.
+#     This default gene pool selects valid solutions from a uniform distribution
+#     between two different limits.
        
-    """
+#     """
     
-    # Generates valid solutions for each individual genom
-    def __init__(self, llims, ulims):
-        self.super().__init(llims, ulims)
+#     # Generates valid solutions for each individual genom
+#     def __init__(self, llims, ulims):
+#         self.super().__init(llims, ulims)
 
-    def getGene(self, rand, lbounds, ubounds):
+#     def getGene(self, rand, lbounds, ubounds):
         
-        dx = ubounds - lbounds
-        gene = dx*rand + lbounds
-        return gene
+#         dx = ubounds - lbounds
+#         gene = dx*rand + lbounds
+#         return gene
     
-    def getGenotype(self):
-        """
-        Gets all genes and stores it in a container
-        """
+#     def getGenotype(self):
+#         """
+#         Gets all genes and stores it in a container
+#         """
         
-        Ngenes = len(self.llims)
-        genotype = []
-        for ii in range(Ngenes):
+#         Ngenes = len(self.llims)
+#         genotype = []
+#         for ii in range(Ngenes):
         
-            lbounds = self.llims[ii]
-            ubounds = self.ulims[ii]
-            rand = np.random.random(Ngenes)
-            genotype.append(self.getGene(rand, lbounds,ubounds ))
+#             lbounds = self.llims[ii]
+#             ubounds = self.ulims[ii]
+#             rand = np.random.random(Ngenes)
+#             genotype.append(self.getGene(rand, lbounds,ubounds ))
         
-        return genotype
+#         return genotype
 
 
 

@@ -8,7 +8,7 @@ Created on Sun Dec 20 18:43:11 2020
 
 import os
 import numpy as np
-from .solutionClass import Individual, Generation, DefaultGenePool
+from .solutionClass import Individual, Generation, BasicGenePool
 
 # from .defaultFuncs import (initPopulation, defaultEnvironment, 
 #                            defaultCrossover, defaultMutate, 
