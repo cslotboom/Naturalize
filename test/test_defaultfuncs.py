@@ -19,32 +19,32 @@ Npop = len(scores)
 
 solution = np.array([0,1,3,2,5,4])
 
-def test_crossGene():
+# def test_crossGene():
 
     
-    out1, out2 = df.crossGene(genea, geneb)
+#     out1, out2 = df.crossGene(genea, geneb)
     
-    check1 = np.all(genea[:4] == out1[:4]) and (geneb[4] == out2[4])
-    check2 = np.all(geneb[:4] == out2[:4]) and (genea[4] == out1[4])
+#     check1 = np.all(genea[:4] == out1[:4]) and (geneb[4] == out2[4])
+#     check2 = np.all(geneb[:4] == out2[:4]) and (genea[4] == out1[4])
     
-    assert np.all(check1 == check2)
+#     assert np.all(check1 == check2)
 
 
-def test_default_crossGene():
+# def test_default_crossGene():
 
     
-    Indout1, Indout2 = df.defaultCrossover(individualA, individualB)
+#     Indout1, Indout2 = df.defaultCrossover(individualA, individualB)
     
-    genea = individualA.genotype[0]
-    geneb = individualB.genotype[0]
+#     genea = individualA.genotype[0]
+#     geneb = individualB.genotype[0]
     
-    out1 = Indout1.genotype[0]
-    out2 = Indout2.genotype[0]
+#     out1 = Indout1.genotype[0]
+#     out2 = Indout2.genotype[0]
     
-    check1 = np.all(genea[:2] == out1[:2]) and (geneb[2:] == out2[2:])
-    check2 = np.all(geneb[:2] == out2[:2]) and (genea[2:] == out1[2:])
+#     check1 = np.all(genea[:2] == out1[:2]) and (geneb[2:] == out2[2:])
+#     check2 = np.all(geneb[:2] == out2[:2]) and (genea[2:] == out1[2:])
     
-    assert np.all(check1 == check2)
+#     assert np.all(check1 == check2)
 
 # rankedFitness = _rankFitness(scores)
 
