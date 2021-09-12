@@ -9,16 +9,11 @@
 
 Naturalize is a Python genetic algorithm solver for generic optimization problems. Given a function to solve and a set of "genes" that define the solution space, Naturalize can find solutions to arbitary problems. Naturalize provides users with many tools to customize their optimizaiton analysis, such as saving a particular generation and restarting the analysis. Naturalize also provides a set of tools for recording, tracking and visualizing genes over time.
 
-Naturalize is in beta testing. This means that the solver is stable, but significant changes may occur to the function names or API. Comments welcome!
+Naturalize is in beta testing. This means that the solver is stable, but significant changes may occur to the function names or API. Use with caution. Comments are welcome!
 
 ## Getting started, basic example
-In this basic example.
-Finding the optimal values to a mathematical function:
-
-Our test funciton will just be the equation we wanted to solve.
-
-We can encode the as a set of numbers
-
+In this basic example, the optimum value of a function will be found within a certain sets of bounds.
+The output of the function will be minimized.
 
 XXX code block for EX1
 
