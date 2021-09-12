@@ -15,7 +15,7 @@ Naturalize is in beta testing. This means that the solver is stable, but signifi
 In this basic example, the optimum value of a function will be found within a certain sets of bounds.
 The output of the function will be minimized.
 
-```
+```Python 
 import naturalize as nat
 
 def objectiveFunction(x, y, z):
