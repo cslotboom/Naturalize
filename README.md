@@ -15,7 +15,42 @@ Naturalize is in beta testing. This means that the solver is stable, but signifi
 In this basic example, the optimum value of a function will be found within a certain sets of bounds.
 The output of the function will be minimized.
 
-XXX code block for EX1
+```
+import naturalize as nat
+
+def objectiveFunction(x, y, z):
+    """ The function we wish to minimize """
+    return x*y + (z)
+
+def ftest(individual, env):
+    """
+    The function that will get applied to each individual.
+    """
+    individual.result = objectiveFunction(*individual.genotype[0])
+    return individual.result
+
+
+lowerBounds = np.array([-10, -10, -10])     # minimum values on each gene
+upperBounds = np.array([10, 10, 10])        # the maximum value on each gene
+Ngen = 100              # Number of generations for the analysis
+Npop = 30               # The population of each generaton
+Ncouples = 10           # The number of couples - each makes two offspring
+Nsurvive = 1            # The number of unmodified survivors
+recordGen = 5           # The time between a generation being recorded 
+Nrecord   = 15          # The number of individuals to record in the generation.
+
+# Define the analysis objects. We
+genePool  = nat.BasicGenePool(lowerBounds, upperBounds)
+helper    = nat.AlgorithmHelper(ftest, genePool = genePool)
+algorithm = nat.GeneticAlgorithm(Npop, Ncouples, Nsurvive, helper)
+recorder  = nat.basicRecorder(5, 15)
+
+analysis = nat.Analysis(algorithm, recorder)
+solution = analysis.runAnalysis(Ngen)
+print(solution)
+
+data = analysis.getRecorderData()
+```
 
 
 
