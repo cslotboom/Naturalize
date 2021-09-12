@@ -23,33 +23,25 @@ def objectiveFunction(x, y, z):
     return x*y + (z)
 
 def ftest(individual, env):
-    """
-    The function that will get applied to each individual.
-    """
+    """ The function that will get applied to each individual. """
     individual.result = objectiveFunction(*individual.genotype[0])
-    return individual.result
 
-
-lowerBounds = np.array([-10, -10, -10])     # minimum values on each gene
-upperBounds = np.array([10, 10, 10])        # the maximum value on each gene
+lowerBounds = [-10, -10, -10]    # minimum values on each gene
+upperBounds = [10, 10, 10]       # the maximum value on each gene
 Ngen = 100              # Number of generations for the analysis
 Npop = 30               # The population of each generaton
 Ncouples = 10           # The number of couples - each makes two offspring
 Nsurvive = 1            # The number of unmodified survivors
-recordGen = 5           # The time between a generation being recorded 
-Nrecord   = 15          # The number of individuals to record in the generation.
 
 # Define the analysis objects. We
 genePool  = nat.BasicGenePool(lowerBounds, upperBounds)
-helper    = nat.AlgorithmHelper(ftest, genePool = genePool)
+helper    = nat.AlgorithmHelper(ftest, genePool)
 algorithm = nat.GeneticAlgorithm(Npop, Ncouples, Nsurvive, helper)
-recorder  = nat.basicRecorder(5, 15)
-
-analysis = nat.Analysis(algorithm, recorder)
-solution = analysis.runAnalysis(Ngen)
+analysis  = nat.Analysis(algorithm)
+solution  = analysis.runAnalysis(Ngen)
 print(solution)
 
-data = analysis.getRecorderData()
+
 ```
 
 
