@@ -6,20 +6,33 @@ Created on Sun Dec 20 18:43:11 2020
 """
 import numpy as np
 import hysteresis
+
+import collections
 # =============================================================================
 # Generation/Population
 # =============================================================================
 
 
-class Generation:
+class Generation(collections.UserList):
     
     """ A generation contians a collection of all individuals in a population,
     As well as the score and rank of those individuals.
+    
+    Parameters
+    ----------
+    population : List
+        A list of all the individuals in the current generation.
+    genNumber : int
+        The current generatio nnumber..
+
     """
     
     def __init__(self, population, genNumber):
-        # self.size = size
-        # a list of all the individuals in a generaiton
+        """
+        Note, data is used to store the data that will be returned when using
+        the "list-like" propreties of the generation.
+        """
+        self.data = population
         self.population = population
         self.size = len(population)
         
@@ -29,6 +42,10 @@ class Generation:
         self.best = None
     
     def getCurrentGenome(self):
+        """
+        Gets the genotypes of all individuals in a population.
+        """
+        
         Genome = [None]*self.size
         for ii, individual in enumerate(self.population):
             Genome[ii] = individual.genotype
@@ -36,6 +53,10 @@ class Generation:
         return Genome
     
     def setGenBest(self):
+        """
+        Sets the best individual in the population.
+
+        """
         population = self.population
         scores = self.scores
     
@@ -122,72 +143,130 @@ class GenePool:
 class BasicGenePool:
     
     """
-    The gene pool generates valid "genes" or solutions.
-    
-    A gene pool is a reflection of all current genes. It differes from the 
-    environment in that the genes change through the analysis.
-    
-    The environment is static!
-    Perhaps the methods of generating genes should be in the environment?
-    
+    The gene pool provides bounds on all possible genes. Genes are valid 
+    solutions to the optimizatoin problem, and are either a int/float, 
+    or numpy array. The gene pool also generates valid genes.
+        
     This default gene pool selects valid solutions from a uniform distribution
     between two different limits.
-       
+    
+    llims and ulims is a list of the bounds on each genetype. These lists can
+    be any objects that can be subtracted - typically this will be a float or 
+    numpy array.
+    
+    It's also possible to provide one gene, generally a numpy array of floats. 
+    In this case in this case that gene will be wrapped by a list.
+    
+    Parameters
+    ----------
+    llims : list, or float/int/np.array
+        The lower bounds on each genes. 
+    ulims : list, or float/int/np.array
+        The upper bounds on each genes. 
     """
+    
+    
     
     # Generates valid solutions for each individual genom
     def __init__(self, llims, ulims):
-        """
-        llims and ulims is a list of the bounds on each gene.
-        They support any objects that can be subtracted - Typically this will be
-        a float or numpy array.
+
+
+
+        # if isinstance(ulims, list) != True:
+        #     ulims = [ulims]
+            
+        # for ii in range(len(llims)):
+        #     obj = llims[ii]
+        #     if isinstance(obj, list):
+        #         llims[ii] = np.array(obj)
+            
         
-        llims and ulims alternatively can be a single numpy array.
-        In this case it will be wrapped by a list.
-        
-        """
-        # If the object isn't contained in a list, make it a list
-        # This makes input cleaner
-        if isinstance(llims, list) != True:
-            llims = [llims]
-        if isinstance(ulims, list) != True:
-            ulims = [ulims]
-        else: 
-            pass
+        # else: 
+        #     pass
             # print(not isinstance(llims, list))
 
-        
-        self.llims = llims
-        self.ulims = ulims
+        self.llims = self._validateGenotype(llims)
+        self.ulims = self._validateGenotype(ulims)
 
-    def getGene(self, rand, lbounds, ubounds):
+    def _validateGenotype(self, limit):
+        """
+        Checks if the base item is a list, makes a list if not.
+        Checks if the child items are lists, if so makes them np.arrays
+        """
         
+        
+        # check if the input is a basic list
+        noList = True
+        for ii in range(len(limit)):
+            if hasattr(limit[0], "__len__"):
+                noList = False
+        if noList:
+            limit = np.array(limit)
+            
+        
+        # # Check if the object is a single list. 
+        # if isinstance()
+        # if hasattr(limit[0], "__len__"):
+            
+        
+        # Check if subitems are a lists - if so make the np.arrays.
+        for ii in range(len(limit)):
+            obj = limit[ii]
+            if isinstance(obj, list):
+                limit[ii] = np.array(obj)
+                
+        # Check if item itself is a list. If not, make it a list.
+        if isinstance(limit, list) != True:
+            limit = [limit]
+
+                
+        return limit
+            
+            
+    def getNewGene(self, rand, lbounds, ubounds):
+        """
+        Randomly generates a raondom gene between the upper and lower bounds
+        for that gene.
+
+        Parameters
+        ----------
+        rand : float 
+            A number between 0 and 1. Used for linear interpolation between 
+            geenes.
+        lbounds : float/int/np.array
+            The gene's lower bound.
+        ubounds : float/int/np.array
+            The gene's upper bound.
+
+        Returns
+        -------
+        gene : TYPE
+            DESCRIPTION.
+
+        """
         dx = ubounds - lbounds
         gene = dx*rand + lbounds
         return gene
     
-    def getGenotype(self):
+    def getNewGenotype(self):
         """
-        Gets all genes and stores it in a container
-        """
+        Generates a new gene for each gene in the gene pool, then stores them 
+        in the genotype list. 
         
+        """
         Ngenes = len(self.llims)
         genotype = []
         for ii in range(Ngenes):
-        
             lbounds = self.llims[ii]
             ubounds = self.ulims[ii]
-            # rand = np.random.random(Ngenes)
-            # genotype.append(self.getGene(rand, lbounds,ubounds ))
-            rand = np.random.random(len(lbounds))
-            genotype.append(self.getGene(rand, lbounds,ubounds ))
-            
-            
-        
+            if not isinstance(lbounds, np.ndarray):
+                Lgene = 1
+            else:
+                Lgene = len(lbounds)
+            rand = np.random.random(Lgene)
+            genotype.append(self.getNewGene(rand, lbounds, ubounds))
+                        
         return genotype
-
-
-
 
 
 # class deepGenePool:
@@ -247,12 +326,11 @@ class BasicGenePool:
 # =============================================================================
 
 class Individual:
-    """ Contains the genotype and some other stuff.
-    
-    A genotype is a valid solution in the solution space.
-    Each will have a name and a generation number.
-    
-    The Individual will also have a result, which is the output of the test.
+    """ 
+    Stores the a genotype as well as some meta information about analysis. 
+    This includes a name and a generation number.
+    It also includes a result, which has the output of each individual when
+    tests.
     """
     
     def __init__(self, genotype):

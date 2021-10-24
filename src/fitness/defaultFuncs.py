@@ -25,21 +25,14 @@ def initPopulation(size, genePool):
 
 class defaultEnvironment:
     """
-    
-    The environment stores conditions universal to all individuals. 
-    
-    For example, some problems may require comparing to data found in a file.
-    The environment could be used to read that file data, allowing each 
-    solution to have access to that data.   
-    
+    Stores conditions universal to all individuals.
     """
     
     def __init__(self):
-        """
-        The generic problem doesn't need an environment
-        """
 
         pass
+
+
 
 def defaultFitness(individual, env):
     """ In this case getting fitness from our result is trivial
@@ -47,14 +40,60 @@ def defaultFitness(individual, env):
     
     return individual.result
 
-def namePopulation(population, gen):
-    """
-    For each individual in the population, assign a name.
-    """
+
+
+
+def mutateGene(individual, oldGene, tempGene, threshold):
+            # for each value we randomly mutate depeding on the threshold.
+        N = len(oldGene)
+        Pvector = np.random.random_sample(N)
+        
+        # Get the genotype and a new genotype
+
+        newGene = np.zeros(N)
+        # Find the first value less than the threshold
+        
+        # Find the values that were mutated, assign them values form the new gene.
+        mutateIndexes = np.where(Pvector < threshold)
+        newGene[mutateIndexes] = tempGene[mutateIndexes]
+        
+        
+        mask = np.ones(N, np.bool)
+        mask[mutateIndexes] = 0
+        newGene[mask] = oldGene[mask]
+        
+        return newGene
+        
+
+
+def defaultMutate(individual, threshold, GenePool):
     
-    for ii, individual in enumerate(population):
-        individual.name = int(ii)
-        individual.gen = int(gen)
+    """
+    Mutate will randomly generate a new solution based on the old solution.
+    
+    The default mutate function generates valid solutions where the solution
+    is an array of inputs:
+        X = [x1, x2, x3, ..., xN]
+    
+    And, that array for two valid solutions X and Y, the solution Z is also a 
+    solution
+        Z = [y1, x2, x3, y4, ..., yN]
+ 
+    """   
+    
+    # Given an individual, randomly create a new solution
+    Ngenes = len(individual.genotype)
+    newGenotype = [None]*Ngenes
+    tempGenotype = GenePool.getNewGenotype()
+    
+    for ii in range(Ngenes):
+        oldGene = individual.genotype[ii]
+        tempGene    = tempGenotype[ii]
+        newGenotype[ii] = mutateGene(individual, oldGene, tempGene, threshold)
+
+    
+    return Individual(newGenotype)
+
 
 # =============================================================================
 # Default evaluation functions
@@ -64,15 +103,6 @@ Thes functions are used to work with individual containers
 """
 
 def _rankFitness(scores, Npop):
-    
-    """
-    Assign a rank to each item in the population, with low scors being assigned
-    the first rank.
-    
-      [0, 1, 100, 20, 0.1, 5]   - >    [0, 2, 5, 4, 1, 3]
-    
-    """
-    
     # find wich scores should be combined
     # Scores with a low fitness should be combined at higher probability
       
@@ -81,32 +111,12 @@ def _rankFitness(scores, Npop):
     # sort the array, then create an array of ranks
     sortedIndexes = scores.argsort()    
     populationRanks[sortedIndexes] = np.arange(Npop)
+
+    # the inverse of the fitness rank
+    # return Npop - populationRanks
     return populationRanks
 
-def _rankFitnessInversed(scores, Npop):
-    """
-    Assign a rank to each item in the population, with high scores being assigned
-    the highest rank.
-    
-      [0, 1, 100, 20, 0.1, 5]   - >    [5, 3, 0, 1, 4, 2]
-      
-    Parameters
-    ----------
-    scores : list
-        A list of input scores input scores.
-    Npop : TYPE
-        THe number of individuals in the population.
-
-    Returns
-    -------
-    float
-        The ranks in order of highest output to lowest output.
-
-    """
-          
-    ranks = _rankFitness(scores, Npop)
-    return Npop - ranks
-
+# def _getRouleteArea
 
 def defaultFitnessProbs(scores):
     
@@ -146,4 +156,9 @@ def pick_Individual(population, probs):
     selection = population[np.argmax(rand < probs)]
     return selection
 
+def namePopulation(population, gen):
+    
+    for ii, individual in enumerate(population):
+        individual.name = int(ii)
+        individual.gen = int(gen)
             

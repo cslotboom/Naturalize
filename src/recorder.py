@@ -105,7 +105,7 @@ class basicRecorder(Recorder):
         
         if self.shouldRecord(currentGen.gen) == False:
             return
-                    
+        print(currentGen.gen)
         # Record the best of each generation
         self.data.genNumber.append(currentGen.gen)
         self.recordBestAbsolute(currentGen)
@@ -306,8 +306,8 @@ def pickleAnalysis(geneticAlgorithm, fileName):
         print('Removing old file at: ', fileName)
     
     filehandler = open(fileName, 'wb')
-
-    
+    # pickle.dump(geneticAlgorithm, filehandler)
+    # print('File Saved at: ', fileName)    
     try:
         pickle.dump(geneticAlgorithm, filehandler)
         print('File Saved at: ', fileName)

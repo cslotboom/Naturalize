@@ -70,7 +70,7 @@ def test_EnforceBoundary():
     
     assert check1 
     
-test_EnforceBoundary()
+# test_EnforceBoundary()
 
 
 # test_mutateGenePereturbate_1()

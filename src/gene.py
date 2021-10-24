@@ -12,55 +12,49 @@ import numpy as np
 from .solutionClass import Individual, Generation, BasicGenePool
 
 from .defaultFuncs import (initPopulation, defaultEnvironment, 
-                           defaultFitness,
+                           defaultCrossover, defaultMutate, defaultFitness,
                            defaultFitnessProbs, pick_Individual, 
                            namePopulation)
-
-from .crossover import getCrossover
-from .mutate import getMutate
-
 import pickle 
 
-
-# Define the default functions for hte analysis.
-defaultCrossover = getCrossover()
-defaultMutate = getMutate()
-
 class AlgorithmHelper:
-    
-    """
-    The algorithm helper is used to pass functions to the genetic algorithm.
-    The user can set custom f
-
-    Parameters
-    ----------
-    ftest : TYPE
-        DESCRIPTION.
-    ffit : TYPE, optional
-        DESCRIPTION. The default is defaultFitness.
-    genePool : TYPE, optional
-        DESCRIPTION. The default is DefaultGenePool.
-    fmut : TYPE, optional
-        DESCRIPTION. The default is defaultMutate.
-    fcross : TYPE, optional
-        DESCRIPTION. The default is defaultCrossover.
-    fprobs : TYPE, optional
-        DESCRIPTION. The default is defaultFitnessProbs.
-    environment : TYPE, optional
-        DESCRIPTION. The default is defaultEnvironment().
-
-    Returns
-    -------
-    None.
-
+    """ 
+    This class takes in the custom functions we define then passes it to the 
+    genetic algorithm class
     """
     
-    def __init__(self, ftest, genePool, ffit = defaultFitness, 
+    def __init__(self, ftest, ffit = defaultFitness, 
+                 genePool = BasicGenePool,   
                  fmut = defaultMutate, 
                  fcross = defaultCrossover, 
                  fprobs = defaultFitnessProbs,
                  environment = defaultEnvironment()):
+        """
+        The algorithm helper is used to pass functions to the genetic algorithm.
+        The user can set custom f
 
+        Parameters
+        ----------
+        ftest : TYPE
+            DESCRIPTION.
+        ffit : TYPE, optional
+            DESCRIPTION. The default is defaultFitness.
+        genePool : TYPE, optional
+            DESCRIPTION. The default is DefaultGenePool.
+        fmut : TYPE, optional
+            DESCRIPTION. The default is defaultMutate.
+        fcross : TYPE, optional
+            DESCRIPTION. The default is defaultCrossover.
+        fprobs : TYPE, optional
+            DESCRIPTION. The default is defaultFitnessProbs.
+        environment : TYPE, optional
+            DESCRIPTION. The default is defaultEnvironment().
+
+        Returns
+        -------
+        None.
+
+        """
         
         
         self.ftest = ftest
@@ -142,12 +136,12 @@ class GeneticAlgorithm:
         self.getfitnessProbs = Helper.getfitnessProbs
         self.environment = Helper.environment
         # Assign GenePool?
+
         self.best = None
 
     def getChild(self, population, fitnessProbs):
         """
-        Gets the childeren of a single pair of individuals, using the rules
-        defined 
+        Gets the childeren of a single pair of individuals
         """
         mate1 = pick_Individual(population, fitnessProbs)
         mate2 = pick_Individual(population, fitnessProbs)
@@ -192,7 +186,7 @@ class GeneticAlgorithm:
         ii = len(new_population)
         # while len(new_population) < self.Npop:
         while ii < self.Npop:
-            newGenotype = self.genePool.getNewGenotype()
+            newGenotype = self.genePool.getGenotype()
             new_population += [Individual(newGenotype)]
             ii +=1
     def testGen(self, generation):
@@ -361,11 +355,11 @@ class Analysis():
             if self.genCount != 0:
                 self.record()
         
-        return self._smartReturn()
+        return self.smartReturn()
         # return self.currentBest        
     
     
-    def _smartReturn(self):
+    def smartReturn(self):
         """
         If the the genotype is trivial (only one gene), then we return an array
         of that gene only.
