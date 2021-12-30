@@ -150,7 +150,7 @@ class BasicGenePool:
     This default gene pool selects valid solutions from a uniform distribution
     between two different limits.
     
-    llims and ulims is a list of the bounds on each genetype. These lists can
+    llims and ulims is a list of the bounds on each genotype. These lists can
     be any objects that can be subtracted - typically this will be a float or 
     numpy array.
     
@@ -164,26 +164,9 @@ class BasicGenePool:
     ulims : list, or float/int/np.array
         The upper bounds on each genes. 
     """
-    
-    
-    
+       
     # Generates valid solutions for each individual genom
     def __init__(self, llims, ulims):
-
-
-
-        # if isinstance(ulims, list) != True:
-        #     ulims = [ulims]
-            
-        # for ii in range(len(llims)):
-        #     obj = llims[ii]
-        #     if isinstance(obj, list):
-        #         llims[ii] = np.array(obj)
-            
-        
-        # else: 
-        #     pass
-            # print(not isinstance(llims, list))
 
         self.llims = self._validateGenotype(llims)
         self.ulims = self._validateGenotype(ulims)
@@ -225,8 +208,8 @@ class BasicGenePool:
             
     def getNewGene(self, rand, lbounds, ubounds):
         """
-        Randomly generates a raondom gene between the upper and lower bounds
-        for that gene.
+        Randomly generates a gene between the upper and lower bounds based
+        on a randomly generated number
 
         Parameters
         ----------
@@ -252,6 +235,7 @@ class BasicGenePool:
         """
         Generates a new gene for each gene in the gene pool, then stores them 
         in the genotype list. 
+        
         
         """
         Ngenes = len(self.llims)
@@ -334,8 +318,6 @@ class Individual:
     """
     
     def __init__(self, genotype):
-        
-        # Check if 
         self.genotype = genotype
         self.Ngenes = len(genotype)
         self.result = None

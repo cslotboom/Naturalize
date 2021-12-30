@@ -3,12 +3,30 @@
 Created on Sun Dec 20 18:43:11 2020
 
 @author: Christian
-"""
 
+        The test is where the indivdual passes through the environment.
+        This will lead to some raw result.
+        The fitness function is then used to process the raw result and get
+        the scalar fitness quantity.
+                
+        TODO:
+            Consider making mutate affect ALL genes.
+            The more genes that are added, the less likely an individual will
+            stay the same.
+            I guess that probably is true to nature..
+        
+        
+        That is then. For many problems
+
+# TODO: simplify the ftest formulentation with a decorator.
+
+
+"""
 
 
 import os
 import numpy as np
+from copy import deepcopy
 from .solutionClass import Individual, Generation, BasicGenePool
 
 from .defaultFuncs import (initPopulation, defaultEnvironment, 
@@ -19,29 +37,34 @@ from .defaultFuncs import (initPopulation, defaultEnvironment,
 from .crossover import getCrossover
 from .mutate import getMutate
 
-import pickle 
-
-
-# Define the default functions for hte analysis.
+# Define the default functions for the analysis.
 defaultCrossover = getCrossover()
 defaultMutate = getMutate()
 
 class AlgorithmHelper:
     
     """
-    The algorithm helper is used to pass functions to the genetic algorithm.
-    The user can set custom f
-
+    The algorithm helper contains all the functions used to define the 
+    optimization analysis. The user can set customized functions to the 
+    algorithm if they want to override default behaviour.
+    
     Parameters
     ----------
-    ftest : TYPE
-        DESCRIPTION.
-    ffit : TYPE, optional
-        DESCRIPTION. The default is defaultFitness.
-    genePool : TYPE, optional
-        DESCRIPTION. The default is DefaultGenePool.
-    fmut : TYPE, optional
-        DESCRIPTION. The default is defaultMutate.
+    ftest : function
+        The test function to use in the analysis. This is used to "test" each
+        individual, passing it through the environment and recording the raw 
+        result.
+    ffit : function, optional
+        A function used to further process the results of the test function.
+        The outputs of this function are what are used ultimately used to 
+        evaluate system fitness. The default is defaultFitness, which uses the
+        results of the test function with no processing.
+    genePool : class, optional
+        The genePool to be used in the problem. This defines the shape of each 
+        gene, as well as the all possible solutions.
+    fmut : function, optional
+        The function to be used for mutating genes. 
+        The default funciton is is defaultMutate.
     fcross : TYPE, optional
         DESCRIPTION. The default is defaultCrossover.
     fprobs : TYPE, optional
@@ -60,8 +83,6 @@ class AlgorithmHelper:
                  fcross = defaultCrossover, 
                  fprobs = defaultFitnessProbs,
                  environment = defaultEnvironment()):
-
-        
         
         self.ftest = ftest
         self.ffit = ffit
@@ -78,25 +99,12 @@ class AlgorithmHelper:
 
 class GeneticAlgorithm:
     
-    def __init__(self, Npop, Ncouples, Nsurvive, Helper, mutThresold = 0.1
-                 , recordGenerations = False):
+    def __init__(self, Npop, Ncouples, Nsurvive, Helper:AlgorithmHelper, 
+                 mutThresold = 0.1, recordGenerations = False):
         """
-        The test is where the indivdual passes through the environment.
-        This will lead to some raw result.
-        The fitness function is then used to process the raw result and get
-        the scalar fitness quantity.
-        
-        TODO: consider combining both functions into one.
-        We could combine both into one function if we'd like.
-        
-        TODO:
-            Consider making mutate affect ALL genes.
-            The more genes that are added, the less likely an individual will
-            stay the same.
-            I guess that probably is true to nature..
-        
-        
-        That is then. For many problems
+        Defines how the population of solutions will change from generation 
+        to generation. 
+
 
         Parameters
         ----------
@@ -114,10 +122,6 @@ class GeneticAlgorithm:
         recordGenerations : boolean, optional
             A toggle that turns on or off the storing of generations. 
             The default is True, which stores all generations
-
-        Returns
-        -------
-        None.
 
         """
 
@@ -202,8 +206,8 @@ class GeneticAlgorithm:
         """
         # Test individuals
         for individual in generation.population:
-            #TODO: consider if it's better to change individual in funcition
-            self.ftest(individual, self.environment)
+            
+            individual.result = self.ftest(individual, self.environment)
 
             
     def scoreGen(self, currentGen):
@@ -270,7 +274,7 @@ def getNextGen(analysis, oldGeneration, genNumber):
 
 class Analysis():
     
-    def __init__(self, algorithm, recorder=None, printStatus = True):
+    def __init__(self, algorithm:GeneticAlgorithm, recorder=None, printStatus=True):
    
         self.algorithm = algorithm
         self.recorder = recorder
@@ -282,6 +286,13 @@ class Analysis():
         
         if algorithm.ftest == None:
             raise Exception('No test function assigned to the algorithm.')
+    
+    def getCurretGen(self):
+        return self.currentGen
+    
+    def setAlgorithm(self, algorithm):
+        self.algorithm = algorithm
+    
     
     def scoreCurrentGen(self):
         #TODO: this may be slow
@@ -327,7 +338,7 @@ class Analysis():
             # print(self.currentGen.gen)
     
     
-    def runAnalysis(self, Ngen, intialGen = None):
+    def runAnalysis(self, Ngen, initialGen = None):
         
         """
         Record logic - record the veryt first generation. Then record every
@@ -341,17 +352,17 @@ class Analysis():
         self.Ngen = Ngen
         
         # If it's the first generation, and no generation is supplied, make one.
-        if self.genCount == 0 and intialGen == None:
+        if self.genCount == 0 and initialGen == None:
             self.initGeneration()
             self.record()
-        elif intialGen != None:
-            self.currentGen = intialGen
-            self.genCount = intialGen.gen #TODO: change variable name!
+        elif initialGen != None:
+            self.currentGen = initialGen
+            self.genCount = initialGen.gen #TODO: change variable name!
             
         for ii in range(self.Ngen):
             
-            if ii == 99:
-                a = 1
+            # if ii == 99:
+            #     a = 1
             
             self.genCount += 1
             newGen = self.getNextGen()            
@@ -362,8 +373,11 @@ class Analysis():
                 self.record()
         
         return self._smartReturn()
-        # return self.currentBest        
-    
+        
+    def _checkGenSize(self, initialGen):
+        if len(self.currentGen) != len(initialGen):
+            raise Exception('New generation has different size than old generation.')
+        
     
     def _smartReturn(self):
         """
@@ -424,8 +438,9 @@ class Analysis():
     
     def getRecorderData(self):
         """ Fixe the data for processing, then return it."""
-        self.recorder.data.convert()
-        return self.recorder.data
+        myContainer = deepcopy(self.recorder)
+        myContainer.data.convert()
+        return myContainer.data
     
         
 def SaveGeneration():

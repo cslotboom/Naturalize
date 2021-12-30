@@ -78,9 +78,9 @@ This is tightly coupled to the individual object and generation objects
 """
 class Recorder():
     
-    def __init__(self, Nrecord: int, Nstore:int = 1):
+    def __init__(self, recordEvery: int, Nstore:int = 1):
 
-        self.Nrecord = Nrecord
+        self.recordEvery = recordEvery
         self.Nstore = Nstore        
         self.data = dataContainer()
 
@@ -88,7 +88,7 @@ class Recorder():
         """
         Checks if the current generation should be recorded.
         """
-        if (N)% self.Nrecord ==0:
+        if (N)% self.recordEvery ==0:
             return True
         return False
     
@@ -144,8 +144,8 @@ class basicRecorder(Recorder):
 
 class liteRecorder(Recorder):
     
-    def __init__(self, Nrecord: int):
-        super().__init__(Nrecord)
+    def __init__(self, recordEvery: int):
+        super().__init__(recordEvery)
             
     def record(self, currentGen):
         
@@ -298,6 +298,10 @@ def readSavedGen(FileName):
 
 
 def pickleAnalysis(geneticAlgorithm, fileName):
+    
+    """
+    Saves the current generation as a pickle.
+    """
 
     
     # Delete the old object
@@ -318,6 +322,11 @@ def pickleAnalysis(geneticAlgorithm, fileName):
     
     
 def readPickle(fileName):
+    
+    """
+    Reads a saved pickle.
+    """
+    
 
     fileObj = open(fileName, 'rb')
     outputObject = None
