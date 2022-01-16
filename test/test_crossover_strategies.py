@@ -1,10 +1,8 @@
 
 import naturalize.crossover.strategies as st
-# from naturalize.solutionClass import Individual
+import naturalize.crossover.core as c
+import naturalize as nat
 import numpy as np
-
-# np.random.seed(25)
-
 
 genea = np.linspace(0,5,6)
 geneb = np.linspace(0,5,6)*5
@@ -34,5 +32,43 @@ def test_crossGeneAvgSingleCut():
     
     assert check1== True and check2 == True
 
-# test_crossGeneSingleCut()
-# test_crossGeneAvgSingleCut()
+
+
+
+genea = np.empty(5)
+geneb = np.empty(5)
+
+individualA = nat.Individual([genea])
+individualB = nat.Individual([geneb])
+
+
+def test_crossGene():
+
+    
+    out1, out2 = st.crossGeneSingleCut(genea, geneb)
+    
+    check1 = np.all(genea[:4] == out1[:4]) and (geneb[4] == out2[4])
+    check2 = np.all(geneb[:4] == out2[:4]) and (genea[4] == out1[4])
+    
+    assert np.all(check1 == check2)
+
+
+def test_default_crossGene():
+
+    defaultCrossover = c.getCrossover()
+    Indout1, Indout2 = defaultCrossover(individualA, individualB)
+    
+    genea = individualA.genotype[0]
+    geneb = individualB.genotype[0]
+    
+    out1 = Indout1.genotype[0]
+    out2 = Indout2.genotype[0]
+    
+    check1 = np.all(genea[:2] == out1[:2]) and (geneb[2:] == out2[2:])
+    check2 = np.all(geneb[:2] == out2[:2]) and (genea[2:] == out1[2:])
+    
+    assert np.all(check1 == check2)
+
+
+# test_crossGene()
+# test_default_crossGene()

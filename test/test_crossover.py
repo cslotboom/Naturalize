@@ -1,6 +1,5 @@
-
-import naturalize.crossover.cross as c
-import naturalize.crossover.cross as st
+import naturalize.crossover.core as c
+import naturalize.crossover.strategies as st
 from naturalize.solutionClass import Individual
 import numpy as np
 import pytest
@@ -17,13 +16,9 @@ Npop = len(scores)
 
 solution = np.array([0,1,3,2,5,4])
 
-
 def custom_Crossover(geneA, geneB):
     
     return  np.zeros_like(geneA), np.zeros_like(geneB)
-
-
-
 
 
 def test_input_Parse_int():
@@ -33,16 +28,23 @@ def test_input_Parse_int():
 
 
 def test_input_Parse_int_fail():
-    
     with pytest.raises(Exception):
         strat = st._parseStrategyInputs(4)
-
-    # assert stat == 
 
 def test_input_Parse_func():
     strat = c._parseStrategyInputs(custom_Crossover)
 
     assert strat == custom_Crossover
+
+
+
+
+
+
+
+
+
+
 
 # test_input_Parse_func()
 # def test_default_crossGene():
