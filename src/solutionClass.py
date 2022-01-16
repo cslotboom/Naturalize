@@ -96,7 +96,26 @@ class Generation(collections.UserList):
     #     self.bestScore = scores[np.argmin(scores)]
     #     self.bestGenome = self.best.genotype   
 
+def namePopulation(population, gen):
+    """
+    For each individual in the population, assign a name.
+    """
+    
+    for ii, individual in enumerate(population):
+        individual.name = int(ii)
+        individual.gen = int(gen)
 
+def initPopulation(size, genePool):
+    """ Creates the first generation of the population"""
+    gen = 0
+    population = []
+    for ii in range(size):
+        genotype = genePool.getNewGenotype()
+        population.append(Individual(genotype))
+        
+    namePopulation(population, gen)
+        
+    return population
 
 # =============================================================================
 # The default gene pool. The user may overwrite this with their own class
@@ -110,6 +129,17 @@ class Generation(collections.UserList):
     # Make the default genome a array of arrays.
 #   Can the default genome be a list of list??
 
+
+class Gene(np.ndarray):
+    """
+    all this will do is enforce the proper shape for a gene
+    """
+    # __init__(self,)
+
+class Genotype():
+    """
+    This will ensure that goentypes have the proper structure.
+    """
 
 
 class GenePool:

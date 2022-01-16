@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Dec 20 18:43:11 2020
-
-@author: Christian
-
-
+TODO:
+    The scheme is a little awkward right now, in that functions are passed
+    arguements that they don't need.
+    
+    We could pass in the genePool to each sub-function. That would be more
+    clean conceptually, but require that more genes are used.
+    
+    
 """
 
 import numpy as np
@@ -13,50 +16,68 @@ def getMutationChance(N):
     """
     Returns the probability each gene is mutated
     """
-    
     return np.random.random_sample(N)
 
 # =============================================================================
 # 
 # =============================================================================
 
-def _mutateRandom(oldGene, tempGene, threshold, Pvector, N):
+def _mutateRandom(geneToMutate, randomGene, threshold, Pvector, N):
     """
-    A crossover startegy where the two genes are swapped beyond the cut line.
+    Randomly mutates a old gene to a new one.
     
-        abcde    =>    abCDE
-        ABCDE          ABcde    
     """
     newGene = np.zeros(N)
     
-    # Find the values that were mutated, assign them values form the new gene.
+    # Find values to be mutated, assign them values from the random gene.
     mutateIndexes = np.where(Pvector < threshold)
-    newGene[mutateIndexes] = tempGene[mutateIndexes]
+    newGene[mutateIndexes] = randomGene[mutateIndexes]
     
     # pass the unmutated gene material
     mask = np.ones(N, np.bool)
     mask[mutateIndexes] = 0
-    newGene[mask] = oldGene[mask]
+    newGene[mask] = geneToMutate[mask]
     
     return newGene
 
 
 
-def mutateRandom(oldGene, tempGene, threshold, bounds):
+def mutateRandom(geneToMutate, randomGene, threshold, bounds):
     """
-    Randomly mutates to a new gene that is also within the gene bounds.
+    Randomly mutates the parts of a gene to other values that are also valid.
+
+    Parameters
+    ----------
+    geneToMutate : gene
+        The gene to mutate.
+    randomGene : TYPE
+        The a random gene with values that the old gene will be mutated to.
+        This gene should be a valid solution as well.
+    threshold : float
+        The probaility each gene is mutated.
+    bounds : flaot
+        The bounds each gene is contained by. Unused by this function.
+
+    Returns
+    -------
+    newGene : gene (1D numpy array).
+        The mutated Gene.
     """
     
     # for each value we randomly mutate depeding on the threshold.
-    N = len(oldGene)
+    N = len(geneToMutate)
     Pvector = getMutationChance(N)
-    return _mutateRandom(oldGene, tempGene, threshold, Pvector, N)
+    return _mutateRandom(geneToMutate, randomGene, threshold, Pvector, N)
     
 
 # =============================================================================
 # 
 # =============================================================================
-
+"""
+TODO:
+    This needs to be tested, specifically the part that enforces the boundary 
+    conditions.
+"""
 
 
 def _getPerturbation(N, p):
@@ -66,9 +87,11 @@ def _getPerturbation(N, p):
     return np.ones(N) + np.random.uniform(-1,1,N)*p
     
     
-def _mutatePerturbate(oldGene, threshold, Pvector, N, purtThreshold):
+def _mutatePerturbate(geneToMutate, threshold, Pvector, N, purtThreshold):
     """
-    A mutation strategy where the values are slightly perturbed
+    A mutation strategy where the values are slightly perturbed.
+    Seperate function is used to enfore the bounary terms ion case we perturbe
+    the function outside the initial bounds.
     """
     newGene = np.zeros(N)    
     # Find the values that were mutated, assign them values form the new gene.
@@ -76,14 +99,14 @@ def _mutatePerturbate(oldGene, threshold, Pvector, N, purtThreshold):
     Nmutate = len(mutateIndexes)
     
     perturbation = _getPerturbation(Nmutate, purtThreshold)
-    newGene[mutateIndexes] = oldGene[mutateIndexes]*perturbation
+    newGene[mutateIndexes] = geneToMutate[mutateIndexes]*perturbation
     
     # Enforce Boundaries    
     
     # pass the unmutated gene material
     mask = np.ones(N, np.bool)
     mask[mutateIndexes] = 0
-    newGene[mask] = oldGene[mask]
+    newGene[mask] = geneToMutate[mask]
     
     return newGene
 
@@ -96,22 +119,39 @@ def _enforceBoundary(newGene, bounds):
     return newGene
 
 
-def mutatePerturbate(oldGene, tempGene, threshold, bounds, p = 0.1):
+def mutatePerturbate(geneToMutate, randomGene, threshold, bounds, 
+                     percent = 0.1):
     """
-    Randomly mutates to a new gene that is also within the gene bounds.
-    """
+    Randomly mutates to a new gene that is also within the gene bounds, by
+    changing it within a percentage of it's current value.
     
+    Parameters
+    ----------
+    geneToMutate : gene (1d numpy array)
+        The gene to be mutated.
+    randomGene : gene (1d numpy array)
+        A temporary gene. Unused by this function
+    threshold : float
+        The probability of a mutation occuring for each item in the list.
+    bounds : flaot
+        The bounds each gene is contained by. Unused by this function.
+    percent : TYPE, optional
+        The maximum mamount each gene will be perturbed by. The default is 0.1.
+
+    Returns
+    -------
+    newGene : gene (1D numpy array).
+        The mutated Gene.
+
+    """
     # for each value we randomly mutate depeding on the threshold.
-    N = len(oldGene)
+    N = len(geneToMutate)
     Pvector = getMutationChance(N)
 
-    newGene =  _mutatePerturbate(oldGene, threshold, Pvector, N, p)
-
-    # Enforce Boundary Conditons    
-    underInd = np.where(newGene < bounds[0]) 
-    overInd  = np.where(bounds[1] < newGene)
-    newGene[underInd] = bounds[0][underInd]
-    newGene[overInd]  = bounds[1][overInd]
+    newGene =  _mutatePerturbate(geneToMutate, threshold, Pvector, N, percent)
+    
+    # Enforce Boundary Conditons
+    newGene = _enforceBoundary(newGene, bounds)
     
     return newGene
     

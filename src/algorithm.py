@@ -27,19 +27,15 @@ Created on Sun Dec 20 18:43:11 2020
 import os
 import numpy as np
 from copy import deepcopy
-from .solutionClass import Individual, Generation, BasicGenePool
+from .solutionClass import (Individual, Generation, BasicGenePool, 
+                            initPopulation, namePopulation)
 
-from .defaultFuncs import (initPopulation, defaultEnvironment, 
-                           defaultFitness,
-                           defaultFitnessProbs, pick_Individual, 
-                           namePopulation)
-
+from .fitness import (basicFitness,
+                      getProbStrategy, pick_Individual, 
+                           )
+from .env import defaultEnvironment
 from .crossover import getCrossover
 from .mutate import getMutate
-
-# Define the default functions for the analysis.
-defaultCrossover = getCrossover()
-defaultMutate = getMutate()
 
 class AlgorithmHelper:
     
@@ -57,18 +53,22 @@ class AlgorithmHelper:
     ffit : function, optional
         A function used to further process the results of the test function.
         The outputs of this function are what are used ultimately used to 
-        evaluate system fitness. The default is defaultFitness, which uses the
+        evaluate system fitness. The default is basicFitness, which uses the
         results of the test function with no processing.
     genePool : class, optional
         The genePool to be used in the problem. This defines the shape of each 
         gene, as well as the all possible solutions.
     fmut : function, optional
-        The function to be used for mutating genes. 
-        The default funciton is is defaultMutate.
-    fcross : TYPE, optional
-        DESCRIPTION. The default is defaultCrossover.
+        The function to be used for mutating genes. The default function is is defaultMutate.
+    fcross : function, optional
+        The function used to crossover genes. The default is a crossover with
+        a single cut at a randomly selected point. Different crossover strategies
+        can be selected using the "getCrossover" function, or set as defined by
+        users.
     fprobs : TYPE, optional
-        DESCRIPTION. The default is defaultFitnessProbs.
+        This funciton is used to     
+        The function used to assign the cumulative liklihood of being selected
+        for a population. The default is defaultFitnessProbs.
     environment : TYPE, optional
         DESCRIPTION. The default is defaultEnvironment().
 
@@ -78,15 +78,15 @@ class AlgorithmHelper:
 
     """
     
-    def __init__(self, ftest, genePool, ffit = defaultFitness, 
-                 fmut = defaultMutate, 
-                 fcross = defaultCrossover, 
-                 fprobs = defaultFitnessProbs,
+    def __init__(self, ftest, genePool, ffit = basicFitness, 
+                 fmut = getMutate(), 
+                 fcross = getCrossover(), 
+                 fprobs = getProbStrategy(),
                  environment = defaultEnvironment()):
         
-        self.ftest = ftest
-        self.ffit = ffit
-        self.fmut = fmut
+        self.ftest  = ftest
+        self.ffit   = ffit
+        self.fmut   = fmut
         self.fcross = fcross
         
         self.getfitnessProbs = fprobs

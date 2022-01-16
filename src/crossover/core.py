@@ -5,12 +5,9 @@ Created on Sun Dec 20 18:43:11 2020
 @author: Christian
 """
 
-import numpy as np
 from ..solutionClass import Individual
-from .strategies import crossGeneAvg, crossGeneSingleCut
-
-
-
+from .strategies import (crossGeneSingleCut, crossGeneSingleCutAvg, 
+                         crossGeneAvg, crossGeneRandom)
 
 def _parseStrategyInputs(strategy):
     """
@@ -18,8 +15,10 @@ def _parseStrategyInputs(strategy):
     strategy. Otherwise we pass in the custom strategy directly
     """
     crossoverStrategies = {0:crossGeneSingleCut,
-                           1:crossGeneAvg}
-    
+                           1:crossGeneSingleCutAvg,
+                           2:crossGeneAvg,
+                           3:crossGeneRandom
+                           }
     
     if isinstance(strategy, int):
         if strategy not in crossoverStrategies.keys():
@@ -35,15 +34,14 @@ def _parseStrategyInputs(strategy):
 def getCrossover(strategy = 0):
     """
     
-    A functions that returns the desired crossover function/ It is possible to
+    A functions that returns the desired crossover function. It is possible to
     choose from a set of predefined functions, or using a custom function.
     
-    When chosing from predefined functions, an integer is passed 
+    When chosing from predefined functions, an integer is passed.
     
-    Custom crossover functions will take in two lists, and return two ouput
-    lists for each gene.
+    Custom crossover functions will take in two input numpy arrays, and return 
+    two new arrays for each gene.
         f(geneA, geneB)  ->  newGeneA, newGeneB
-    
     
     Parameters
     ----------
@@ -51,6 +49,8 @@ def getCrossover(strategy = 0):
         The cross over strategy to use. The current strategies supported are        
         0: crossGeneSingleCut
         1: crossGeneSingleCutAvg
+        2: crossGeneAvg
+        3: crossGeneRandom
         
         The default is crossGeneSingleCut.
 
@@ -98,28 +98,3 @@ def getCrossover(strategy = 0):
 
 
 
-# =============================================================================
-# The same structure but using a class
-# =============================================================================
-
-
-
-# class Crossover:
-    
-#     def __init__(self, crossoverStrategy = crossGeneSingeCut):
-#         self.cross = crossoverStrategy
-        
-        
-#     def crossGenotypes(self, a: Individual, b: Individual):
-#         genotypea = a.genotype
-#         genotypeb = b.genotype
-#         Ngenes = a.Ngenes
-        
-#         aOut = [None]*Ngenes
-#         bOut = [None]*Ngenes        
-        
-#         for ii in range(Ngenes):
-#             aOut[ii], bOut[ii] = crossGeneSingeCut(genotypea[ii], genotypeb[ii])
-            
-#         return (Individual(aOut), Individual(bOut))    
-    

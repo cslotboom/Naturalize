@@ -1,1 +1,1 @@
-from .cross import getCrossover
+from .core import getCrossover

@@ -5,27 +5,47 @@ Created on Sun Dec 20 18:43:11 2020
 @author: Christian
 
 
-The 
-
 """
 
 import numpy as np
 
+
+# =============================================================================
+# Single cut crossover
+# =============================================================================
+
 def getRandomCutPoint(genea, geneb):
+    """
+    Gets the index of a random cut point within the gene.
+
+    Parameters
+    ----------
+    genea : 1D numpy array
+        An 1D numpy array of genes.
+    geneb : 1D numpy array
+        An 1D numpy array of genes.
+
+    Returns
+    -------
+    cut : cutInd
+        The Index where the cut betweent he two genes takes place.
+
+    """
     # get the size of the gene
     Nunits = max(len(genea), len(geneb))
     
     # pick a random cut point
-    cut = np.random.choice(np.arange(Nunits))
-    return cut
-
+    cutInd = np.random.choice(np.arange(Nunits))
+    return cutInd
 
 def _crossGeneSingleCut(genea, geneb, cut):
     """
     A crossover startegy where the two genes are swapped beyond the cut line.
-    
+    The function is seperated from the randomly generated cut for testing 
+    purposes
+
         abcde    =>    abCDE
-        ABCDE          ABcde    
+        ABCDE    =>    ABcde    
     """
     # Concetenate makes a new object, no need for copies.
     aOut = np.concatenate([genea[:cut], geneb[cut:]])
@@ -42,27 +62,66 @@ def crossGeneSingleCut(genea, geneb):
 
     Parameters
     ----------
-    genea : 1D array
-        An 1D array/list of genes.
-    geneb : 1D array
-        An 1D array/list of genes.
+    genea : 1D numpy array
+        An 1D numpy array/list of genes.
+    geneb : 1D numpy array
+        An 1D numpy array/list of genes.
     cut : int
         The index of the cut point
 
     Returns
     -------
-    aOut : 1D array
-        The output 1D array/list of for gene a.
-    bOut : 1D array
-        The output 1D array/list of for gene b.
+    aOut : 1D numpy array
+        The output 1D numpy array/list of for gene a.
+    bOut : 1D numpy array
+        The output 1D numpy array/list of for gene b.
 
     """
     cut = getRandomCutPoint(genea, geneb)
        
     return _crossGeneSingleCut(genea, geneb, cut)
     
+
+# =============================================================================
+# Average crossover.
+# =============================================================================
     
-def crossGeneAvg(genea, geneb, cutInd):
+def crossGeneAvg(genea, geneb):
+    """
+    A crossover startegy where the two genes are averaged, with no cut point
+    
+    12347    =>    33334
+    54321          33334    
+    
+    Parameters
+    ----------
+    genea : 1D numpy array
+        An 1D numpy array of genes.
+    geneb : 1D numpy array
+        An 1D numpy array of genes.
+
+    Returns
+    -------
+    aOut : 1D numpy array
+        The output 1D numpy array/list of for gene a.
+    bOut : 1D numpy array
+        The output 1D numpy array/list of for gene b.
+
+    """    
+    
+    avg = np.average([geneb,genea],0)
+    aOut = avg
+    bOut = avg
+    
+    return aOut, bOut
+
+
+
+# =============================================================================
+# random Crossover single cut crossover.
+# =============================================================================
+  
+def crossGeneSingleCutAvg(genea, geneb, cutInd):
     """
     A crossover startegy where the two genes are averaged after a cut point
     
@@ -71,20 +130,20 @@ def crossGeneAvg(genea, geneb, cutInd):
     
     Parameters
     ----------
-    genea : 1D array
-        An 1D array/list of genes.
-    geneb : 1D array
-        An 1D array/list of genes.
+    genea : 1D numpy array
+        An 1D numpy array/list of genes.
+    geneb : 1D numpy array
+        An 1D numpy array/list of genes.
     cut : int
         The index of the cut point
 
 
     Returns
     -------
-    aOut : 1D array
-        The output 1D array/list of for gene a.
-    bOut : 1D array
-        The output 1D array/list of for gene b.
+    aOut : 1D numpy array
+        The output 1D numpy array/list of for gene a.
+    bOut : 1D numpy array
+        The output 1D numpy array/list of for gene b.
 
     """    
     
@@ -110,28 +169,85 @@ def _crossGeneAvgSingleCut(genea, geneb, cut):
 
 
 # =============================================================================
-# A class structure. This may be better in the long run.
+# Random cut Crossover
 # =============================================================================
+  
 
-# class CrossSingle():
-    
-#     def __init__(self, genea, geneb):
-#         self.genea = genea
-#         self.geneb = geneb
-    
-    
-#     def getRandomCutPoint(self):
-#         """
-        
-    
-#         """
-        
-#         # get the size of the gene
-#         Nunits = max(len(self.genea), len(self.geneb))
-        
-#         # pick a random cut point
-#         cut = np.random.choice(np.arange(Nunits))
-#         return cut
 
+def _getRandomCrosInd(genea, geneb):
+    """
+    Swaps the genetic information of genes at random points
+
+    Parameters
+    ----------
+    genea : 1D numpy array
+        An 1D numpy array/list of genes.
+    geneb : 1D numpy array
+        An 1D numpy array/list of genes.
+
+    Returns
+    -------
+    cut : cutInd
+        The Index where the cut betweent he two genes takes place.
+
+    """
+    
+    
+    # get the size of the gene
+    Nunits = min(len(genea), len(geneb))
+    
+    # pick a random cut point
+    Ncross = np.random.choice(np.arange(Nunits))
+    
+    # randomly select a number of items 
+    crossInds = np.random.choice(np.arange(Nunits), Ncross, False)
+    return crossInds
+
+
+
+def crossGeneRandom(genea, geneb):
+    """
+    A crossover startegy where parts of two genes are randomly swapped.
+    
+    12347    =>    14341
+    54321          52327    
+    
+    Parameters
+    ----------
+    genea : 1D numpy array
+        An 1D numpy array/list of genes.
+    geneb : 1D numpy array
+        An 1D numpy array/list of genes.
+
+
+    Returns
+    -------
+    aOut : 1D numpy array
+        The output 1D numpy array/list of for gene a.
+    bOut : 1D numpy array
+        The output 1D numpy array/list of for gene b.
+
+    """    
+    
+    crossInds = getRandomCutPoint(genea, geneb)
+           
+    return _crossGeneSingleCut(genea, geneb, crossInds)
+
+def _crossGeneRandom(genea, geneb, crossInds):
+    """
+    A crossover startegy where parts of two genes are randomly swapped.
+    
+    12347    =>    14341
+    54321          52327    
+    
+    """
+    # Be careful with copying here.
+    
+    aOut = genea
+    aOut[crossInds] = geneb[crossInds]
+    bOut = geneb
+    bOut[crossInds] = genea[crossInds]
+    
+    return aOut, bOut
 
 

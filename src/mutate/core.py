@@ -5,12 +5,8 @@ Created on Sun Dec 20 18:43:11 2020
 @author: Christian
 """
 
-import numpy as np
 from ..solutionClass import Individual
 from .strategies import mutateRandom, mutatePerturbate
-
-
-
 
 def _parseStrategyInputs(strategy):
     """
@@ -100,98 +96,18 @@ def getMutate(strategy = 0, **kwargs):
         genotypea = a.genotype
         Ngenes = a.Ngenes
         newGenotype = [None]*Ngenes
-        tempGenotype = GenePool.getNewGenotype()        
         
-        
+        # a random second solution
+        randomGenotype = GenePool.getNewGenotype()        
+
         for ii in range(Ngenes):
-            oldGene = genotypea[ii]
-            tempGene    = tempGenotype[ii]
-            bounds = [GenePool.llims[ii],  GenePool.ulims[ii]]
+            oldGene  = genotypea[ii]
+            tempGene = randomGenotype[ii]
+            bounds   = [GenePool.llims[ii],  GenePool.ulims[ii]]
             newGenotype[ii] = mutateStrategy(oldGene, tempGene, mutThreshold, bounds, **kwargs)
 
         return Individual(newGenotype)
     
     return mutateGenotypes
-
-
-
-
-# class Crossover:
-    
-#     def __init__(self, strategy, kwargs):
-#         self.mutateStrategy  = _parseStrategyInputs(strategy)
-        
-        
-#     def mutateGenotypes(self, a: Individual, mutThreshold, GenePool):
-#         """
-#         Mutates each gene in the genotype of indivudal using the specified 
-#         strategy.
-
-#         Parameters
-#         ----------
-#         a : Individual
-#             The individual to mutate .
-#         mutThreshold : float in [0,1]
-#             The chance a mutation occurs in each gene.
-#         GenePool : Individual
-#             The gene pool used to select individuals.
-#         Returns
-#         -------
-#         Individual
-#             The mutated individual in the population.
-
-#         """
-        
-        
-#         genotypea = a.genotype
-#         Ngenes = a.Ngenes
-#         newGenotype = [None]*Ngenes
-#         tempGenotype = GenePool.getNewGenotype()        
-            
-        
-#         for ii in range(Ngenes):
-#             oldGene = genotypea[ii]
-#             tempGene    = tempGenotype[ii]
-#             newGenotype[ii] = self.mutateStrategy(oldGene, tempGene, mutThreshold, **self.kwargs)
-
-#         return Individual(newGenotype)
-
-
-
-# def defaultMutate(individual, threshold, GenePool):
-    
-#     """
-#     Mutate will randomly generate a new solution based on the old solution.
-    
-#     The default mutate function generates valid solutions where the solution
-#     is an array of inputs:
-#         X = [x1, x2, x3, ..., xN]
-    
-#     And, that array for two valid solutions X and Y, the solution Z is also a 
-#     solution
-#         Z = [y1, x2, x3, y4, ..., yN]
- 
-#     """   
-    
-#     # Given an individual, randomly create a new solution
-#     Ngenes = len(individual.genotype)
-#     newGenotype = [None]*Ngenes
-#     tempGenotype = GenePool.getNewGenotype()
-    
-#     for ii in range(Ngenes):
-#         oldGene = individual.genotype[ii]
-#         tempGene    = tempGenotype[ii]
-#         newGenotype[ii] = mutateGene(individual, oldGene, tempGene, threshold)
-
-    
-#     return Individual(newGenotype)
-
-
-# =============================================================================
-# The same structure but using a class
-# =============================================================================
-
-
-
 
     
