@@ -20,6 +20,8 @@ Created on Sun Dec 20 18:43:11 2020
 
 # TODO: simplify the ftest formulentation with a decorator.
 
+COnver all classes?
+
 
 """
 
@@ -65,10 +67,16 @@ class AlgorithmHelper:
         a single cut at a randomly selected point. Different crossover strategies
         can be selected using the "getCrossover" function, or set as defined by
         users.
-    fprobs : TYPE, optional
-        This funciton is used to     
+    fprobs : function, optional
         The function used to assign the cumulative liklihood of being selected
-        for a population. The default is defaultFitnessProbs.
+        for in a population. This is a vector from zero to one, where the the 
+        liklihood of each individual being selected corresponds to a range of 
+        probabilities.
+        
+        The default function uses ranked fitness selection, where each 
+        individual is ranked, and has likilhood of being selected is dependant
+        on it's rank.      
+        
     environment : TYPE, optional
         DESCRIPTION. The default is defaultEnvironment().
 
@@ -126,7 +134,6 @@ class GeneticAlgorithm:
         """
 
         # Optimization parameters
-        # self.Ngen = Ngen
         self.Npop = Npop
         self.Ncouples = Ncouples
         self.Nsurvive = Nsurvive
@@ -138,13 +145,13 @@ class GeneticAlgorithm:
         # if Helper == None:
         #     Helper = AlgorithmHelper()
         # Assign the key functions
-        self.genePool = Helper.genePool
-        self.ftest = Helper.ftest
-        self.fitness = Helper.ffit
-        self.cross = Helper.fcross
-        self.mutate = Helper.fmut
-        self.getfitnessProbs = Helper.getfitnessProbs
-        self.environment = Helper.environment
+        self.genePool   = Helper.genePool
+        self.ftest      = Helper.ftest
+        self.fitness    = Helper.ffit
+        self.cross      = Helper.fcross
+        self.mutate     = Helper.fmut
+        self.getfitnessProbs    = Helper.getfitnessProbs
+        self.environment        = Helper.environment
         # Assign GenePool?
         self.best = None
 
@@ -152,6 +159,10 @@ class GeneticAlgorithm:
         """
         Gets the childeren of a single pair of individuals, using the rules
         defined 
+        
+        TODO:
+            return mate1 and mate 2 from this function, instead of
+        
         """
         mate1 = pick_Individual(population, fitnessProbs)
         mate2 = pick_Individual(population, fitnessProbs)
@@ -177,10 +188,6 @@ class GeneticAlgorithm:
         Chooses surviving members.
         """
         
-        # survivors = []
-        # for jj in range(self.Nsurvive):
-        #     survivors += [pick_Individual(population, fitnessProbs)]
-        
         Index = scores.argsort()[:self.Nsurvive]
         pop = np.array(population)
         survivors = pop[Index]
@@ -194,11 +201,11 @@ class GeneticAlgorithm:
         """
         # add new random members
         ii = len(new_population)
-        # while len(new_population) < self.Npop:
         while ii < self.Npop:
             newGenotype = self.genePool.getNewGenotype()
             new_population += [Individual(newGenotype)]
             ii +=1
+            
     def testGen(self, generation):
         
         """
@@ -331,12 +338,9 @@ class Analysis():
         """
         If there is a recorder active, record an instance of the current
         generation.
-        subtract 1 beccause the first generation is zero.
         """
         if self.recorder != None:
-            self.recorder.record(self.currentGen)
-            # print(self.currentGen.gen)
-    
+            self.recorder.record(self.currentGen)   
     
     def runAnalysis(self, Ngen, initialGen = None):
         
@@ -355,15 +359,12 @@ class Analysis():
         if self.genCount == 0 and initialGen == None:
             self.initGeneration()
             self.record()
+            
         elif initialGen != None:
             self.currentGen = initialGen
             self.genCount = initialGen.gen #TODO: change variable name!
             
-        for ii in range(self.Ngen):
-            
-            # if ii == 99:
-            #     a = 1
-            
+        for ii in range(self.Ngen):            
             self.genCount += 1
             newGen = self.getNextGen()            
             self.analyzeGeneration(newGen)
@@ -383,21 +384,19 @@ class Analysis():
         """
         If the the genotype is trivial (only one gene), then we return an array
         of that gene only.
+        
+        This seems like a risky practice, we're assuming the shape of the 
+        genome.
         """
         if len(self.currentBest) == 1:
             return self.currentBest[0]
         return self.currentBest
-        
-    
-    
+
     def analyzeGeneration(self, newGen):
-        
-        
         if self.printStatus:
             print(f'Generation {self.genCount}')
                
         # Score the generation
-        # self.algorithm.scoreGen(currentGen)
         newGen.scores = self.algorithm.scoreGen(newGen)
         newGen.fitnessProbs = self.algorithm.getfitnessProbs(newGen.scores)
         newGen.setGenBest()
@@ -448,12 +447,6 @@ def SaveGeneration():
     
 def loadGeneraton():
     pass
-
-
-
-        # self.currentGen = currentGen
-        # self.currentBest = currentGen.best
-
 
 
 

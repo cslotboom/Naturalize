@@ -4,8 +4,6 @@ Created on Sun Dec 20 18:43:11 2020
 
 @author: Christian
 """
-
-
 import forallpeople
 import os
 import numpy as np
@@ -13,27 +11,24 @@ from .solutionClass import Individual, Generation, BasicGenePool
 
 
 import pickle 
-import time
-# from .
-
-
-
-# The 
 
 """
 Get the cumulative best using another parser function
 """
 
+"""
+Many of the recoder classes directly reference attribures of the data container.
+This seems like a bad practice.
+
+I think the dataContainer class will remain relatively static though.
+It's really just a suggestion for what we can record with the recorder.
+Let's try leaving it for now and see what happens.'
+"""
 
 class dataContainer:
     
     
     def __init__(self, size = 1):
-        
-        """
-        When recording we use lists because it is much quicker to append data
-        to them.
-        """
         # The best individual of the current generation
         self.bestIndividuals = []
         self.bestGenotypes = []    
@@ -42,9 +37,7 @@ class dataContainer:
         self.populations = []
         self.populationBestScores = []
         
-        
     def getAvgScore(self,gen):
-        
         pass
 
     def convert(self):
@@ -52,36 +45,32 @@ class dataContainer:
         """
         This might be a terrible terrible practice, but I'm testing it out because
         I'm brave.
+        Maybe instead of this I'll try "return converted".
         
         Convers all curent attributes to a np array.
         """
         for item in self.__dict__:
             if isinstance(self.__dict__[item], list):
                 self.__dict__[item] = np.array(self.__dict__[item])
-        
-# test = dataContainer()
-# for item in test.__dict__:
-#     print(item)
-#     print(test.__dict__[item])
 
 class generationData():
     
     def __init__(self, population):
         pass        
     
-
-# The recorder object should have rules for recording the current generation
-
 """
 This is tightly coupled to the individual object and generation objects
-
 """
+
+
+
 class Recorder():
     
     def __init__(self, recordEvery: int, Nstore:int = 1):
 
         self.recordEvery = recordEvery
-        self.Nstore = Nstore        
+        self.Nstore = Nstore   
+        # consider removing this reference, and instead passing in the container
         self.data = dataContainer()
 
     def shouldRecord(self, N):
@@ -93,7 +82,7 @@ class Recorder():
         return False
     
     @staticmethod
-    def record(self):
+    def record(self, currentGen):
         'empty'
 
 
@@ -116,26 +105,20 @@ class basicRecorder(Recorder):
         """
         Records the single best geontype, individual and value
         """
-
         self.data.bestIndividuals.append(currentGen.best)
         self.data.bestGenotypes.append(currentGen.best.genotype)
         self.data.bestScores.append(currentGen.bestScore)
-
 
     def recordBestPool(self, currentGen):
         """
         Records the best Nstore individuals of the current generation in
         a population.
         """
-        # Record a pool
-        # Sort the indexes, keep the best Nstore of them     
-        
         
         keepInexes  = np.argsort(currentGen.scores)[:self.Nstore]
         tempPop     = np.array(currentGen.population)
         
         storedIndividuals = tempPop[keepInexes]
-        # time.sleep(.0001)
         self.data.populations.append(storedIndividuals)
         self.data.populationBestScores.append(currentGen.scores[keepInexes])
         
@@ -156,18 +139,16 @@ class liteRecorder(Recorder):
         self.data.genNumber.append(currentGen.gen)
         self.recordBestAbsolute(currentGen)
         
-        
     def recordBestAbsolute(self, currentGen):
         """
         Records the single best geontype, individual and value
         """
-
-        # self.data.bestIndivduals.append(currentGen.best)
-        # self.data.bestGenotypes.append(currentGen.best.genotype)
         self.data.bestScores.append(currentGen.bestScore)       
 
 
-
+# =============================================================================
+# 
+# =============================================================================
 
 def _flattenGene(individual, Nunits):
     
@@ -281,22 +262,6 @@ def readSavedGen(FileName):
     
     
     
-    
-    
-        
-    
-    # for ii in range()
-        
-    # Flatten Genes
-    
-    
-
-# with open("file.txt", "w") as output:
-#     output.write(str(values))
-
-
-
-
 def pickleAnalysis(geneticAlgorithm, fileName):
     
     """
