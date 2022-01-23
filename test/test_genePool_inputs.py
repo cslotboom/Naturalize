@@ -23,5 +23,5 @@ def test_Basic_for_array():
         
     assert np.all(check ==[True,True,True])
     
-test_Basic_for_array()
+# test_Basic_for_array()
 

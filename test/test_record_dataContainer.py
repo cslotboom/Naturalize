@@ -1,5 +1,5 @@
 
-import naturalize.defaultFuncs as df
+# import naturalize.algorithm as df
 from naturalize.recorder import dataContainer
 import numpy as np
 

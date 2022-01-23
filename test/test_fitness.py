@@ -26,8 +26,5 @@ def test_FitnessProbs():
 
 
 
-test_rankScore()
-
-
-
-test_FitnessProbs()
+# test_rankScore()
+# test_FitnessProbs()

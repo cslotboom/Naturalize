@@ -24,7 +24,7 @@ def custom_Crossover(geneA, geneB):
 def test_input_Parse_int():
     strat = c._parseStrategyInputs(1)
 
-    assert strat == st.crossGeneAvg
+    assert strat == st.crossGeneSingleCutAvg
 
 
 def test_input_Parse_int_fail():
@@ -38,10 +38,10 @@ def test_input_Parse_func():
 
 
 
+test_input_Parse_int()
 
-
-
-
+test_input_Parse_int_fail()
+test_input_Parse_func()
 
 
 

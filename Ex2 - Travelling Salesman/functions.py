@@ -1,37 +1,43 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Dec 18 22:59:59 2020
-
 @author: Christian
+
+
+An example that solves a traveling salesman problem via. genetic algorithm.
+Example has been adapted from Greg Michaelson's examples here:
+    https://github.com/gmichaelson/GA_in_python
+    https://www.youtube.com/channel/UCnE8sAcJ-x1ttDcYPqoAdOg
+
+A map is first defined that represents the connection between a set of nodes.
+In this problem the mapping is defined randomly, such that each node has a 
+random chance of being connected to each other node.
+
+This problem defines custom functions to solve the system.
+
+
 """
 
-
-
-
 import numpy as np
-import random
-import copy
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from naturalize.solutionClass import Individual
-
+from naturalize.solutionClass import Individual, GenePool
 
 # np.random.seed(4)
 class Environment:
     
     def __init__(self, pZero, N):
         
-        # Each row and column corresponds to an intersection on our map.
-        # A zero means that there is no connection.
-        # A Xij value means it takes X time to get fromm node i to node j
+        """
+        First initialize the mapping that represents the input graph.
+        Each row and column corresponds to an intersection on our map.
+        A zero means that there is no connection.
+        A Xij value means it takes X time to get fromm node i to node j
         
-        #
-        # np.random.seed = 4random.random()
-        # Create a symetrical matrix
+        """
+        # Create a symetrical connectivity matrix
         tempArray = np.random.random([N,N])
         np.fill_diagonal(tempArray,0)
-        
         mapping = (tempArray + tempArray.T) / 2
            
         # get the values less than our threshold probaility
@@ -43,22 +49,25 @@ class Environment:
     
         mapping[indexes] = 0
         self.mapping = mapping
-    
-        self.mapping = mapping
-    
+        
 
     
     
     
     
-class GenePool:
+class myGenePool(GenePool):
     
     """
-    The gene pool generates valid "genes" or solutions.
+    A custome gene pool is defined. Recal the gene pool is what's used to 
+    generate valid solutions. In this case, valid solutions are paths through
+    the mapping.
     
-    This default gene pool selects valid solutions from a uniform distribution
-    between two different limits.
-    
+    This is acompished by doing a random walk - a new node is randomly selected
+    from the possible set of new nodes. 
+
+
+    The getNewGenotype method is our interface. This must be implemented to
+    work with the algoritm.    
     """
     
     # Generates valid solutions for each individual genom
@@ -67,28 +76,16 @@ class GenePool:
         self.end = end
         self.mapping = mapping
 
-    def getGene(self, rand):
-        pass
-        # gene = self.genereateValidRoute(self.start, self.end)
-        # return gene
-    
-    def getGenome(self):
-        genome = self.genereateValidRoute(self.start, self.end)
-        return genome
+    def getNewGenotype(self):
+        return self.genereateValidRoute(self.start, self.end)
+            
         
-        
-        
-        return genome    
-    
-    
     def genereateValidRoute(self, start, end):
-        # route can't pass through zeros
         # This assumes that there is a valid solution! There might not be one.
-        
 
         mapping = self.mapping       
         
-        # Do a random walk through the network
+        # Do a random walk through the network, check if the next node is the end node
         go = True
         currentNode = start
         solution = [currentNode]
@@ -96,194 +93,136 @@ class GenePool:
         while go == True:
             currentNodeMap = mapping[currentNode] 
             connectedNodeIndex = np.where(currentNodeMap != 0)[0]
-            nextNode = np.random.choice(connectedNodeIndex)
-            # nextNode  = currentNodeMap[nextNodeIndex]
-            
+            nextNode = np.random.choice(connectedNodeIndex)            
             solution.append(nextNode)
+            
             
             if  nextNode == end:
                 go = False
-            
             currentNode = nextNode
             
         return np.array(solution)
     
-    
 
-# def fitness(route, mapping):
-def testIndividual(individual, environment):
+def ftest(individual, environment):
+    """
+    The test function passes the individual through the environment and returns
+    a result. In this case, the distance of the path is calcualted and summed.
+
+    """
     
+    # initialize some variables.
     mapping = environment.mapping
-    route = individual.genome
-    
+    route = individual.genotype
     Npoint = len(route)
-    Indexes = np.arange(Npoint)
+
     
-    # Get the next route entry
-    shiftedIndex = Indexes[:-1] + 1
-    shiftedRoute = route[shiftedIndex]
+    # Get the nodes that the rout takes. route entry
+    startInd = np.arange(Npoint)
+    startNodes = route[:-1]
+    endInd = startInd[:-1] + 1
+    endNodes = route[endInd]
     
-    # Find all of the first nodes, then for those find the distance of the second shifted node
+    # Find the distances using the connectivity matrix
     # distances = mapping[route[:-1], shiftedRoute]
-    dist = np.sum(mapping[route[:-1], shiftedRoute])
+    dist = np.sum(mapping[startNodes, endNodes])
     
     return dist
     
-def ftest(individual, environment):
-    
-    result = testIndividual(individual, environment)
-    individual.result = result
-    return result
 
 def fitness(individual, Environment):
     
-    """ In this case getting fitness from our result is trivial
+    """ 
+    In this case getting fitness from our result is trivial
     """
     
     fitness = individual.result
     return fitness
 
 
-# def ftest(individual):
-#     result = testIndividual(individual)
-#     individual.result = result
-#     return result
-
-
-# def generate_Starting_Population(size, start, end, mapping):
-#     #this just creates a population of different routes of a fixed size.  Pretty straightforward.
-    
-#     population = []
-    
-#     #TODO: vectorize this function
-    
-#     for ii in range(size):
-#         population.append(genereateValidRoute(start, end, mapping))
-        
-#     return population
-
-
 def crossover(a, b):
+    """
+    The crossover is used to generate new solutions based on the two selected
+    individuals. 
+    In this case, new routes are found by finding common Nodes between each
+    route, and swaping the parts of the solution at those points, i.e.
     
-    # This function allows us to generate two new solutions by swaping two
-    # old solutions
-    # a and b.
+    start -> A -> D -> E -> J -> F -> End
+    start -> E -> G -> End
     
-    # The new solution is generated by finding a common point on the path bewtween
-    # the two older solutions, then slicing the cunction at that point
+    new solutions
+    start -> A -> D -> E -> G -> End 
+    start -> E -> J -> F -> End
     
-    g1 = a.genome
-    g2 = b.genome
+    Outputs must be Individuals.
     
+    """
+            
+    g1 = a.genotype
+    g2 = b.genotype
     
     common_elements = set(g1[1:-1]) & set(g2[1:-1])
     
     g1Out = np.zeros_like(g1)
     g2Out = np.zeros_like(g2)
     
-    # our new solution must have at least one valid swap. We can't swap at
-    # the start point, or end point    
+    # Output solution must have a common node, otherwise no crossover can be 
+    # complete.
     if len(common_elements) == 0:
         return (a, b)
     
-    # common_elements.remove(start)
-    # common_elements.remove(end) 
-    # pick a sample
-    # value = random.sample(common_elements, 1)        
+    # complete.
     value = np.random.choice(list(common_elements))   
     
-    # Get the first cur value
+    # Get the first cut value
     cutA = np.random.choice(np.where(g1 == value)[0])
     cutB = np.random.choice(np.where(g1 == value)[0])
     
-    # Concetenate makes a new object, no need for copies.
+    # return the output solutions.
     g1Out = np.concatenate([g1[:cutA], g2[cutB:]])
     g2Out = np.concatenate([g2[:cutB], g1[cutA:]])
     
     return (Individual(g1Out), Individual(g2Out))
 
 
-#TODO: Try some different mutation functions!
 def mutate(individual, threshold, genePool):
+    """
+    Mutates a solution by picking a random point along the solution, and 
+    generating a new valid path from that point onwards.
     
-    # Generate a random number - if it is less than a threshold then recalculate the path
-    # after a certain point.
-
-    mapping = genePool.mapping
-    route = individual.genome
-
-    N = len(mapping)
+    Mutations will depend on a threshold, which is between 0 and 1. This 
+    roughly translates to the likihood of a mutation occuring in each gene.
+    """
+    route = individual.genotype
     N = len(route)
-    Pvector = np.random.random_sample(N)
     
     # Find the first value less than the threshold
+    Pvector = np.random.random_sample(N)
     cutIndex = np.argmin(threshold < Pvector)
-    
     cutNode = route[cutIndex]
     
     # generate a new route        
     newTail = genePool.genereateValidRoute(cutNode, genePool.end)
+    newGenotype = np.concatenate([route[:cutIndex], newTail])
     
-    newGenome = np.concatenate([route[:cutIndex], newTail])
+    return Individual(newGenotype)
     
-    return Individual(newGenome)
-    
-    # new_route = random.randint(1,10,[N,N])
 
 
-# def score_population(population, mapping):
-#     # Find scores for every item of hte pupulation
-    
-#     scores = []
-    
-#     for ii in range(len(population)):
-#         scores += [fitness(population[ii], mapping)]
-        
-#     return np.array(scores)
+def plot_map(mapping):
+    """
+    A plot function to visualize the mapping
+    """
+    ax = sns.heatmap(mapping)
+    plt.show()
 
+def plot_best(mapping, route, iteration_number, start, end):
+    """
+    A plot function to visualize the mapping and solution.
+    """
+    ax = sns.heatmap(mapping)
 
-
-
-
-# def get_fitness_probailities(scores):
-#         # find wich scores should be combined
-#     # Scores with a low fitness should be combined at higher probability
-#     Npop = len(scores)   
-#     populationRanks = np.zeros(Npop)
-    
-#     # sort the array, then create an array of ranks
-#     sortedIndexes = scores.argsort()    
-#     populationRanks[sortedIndexes] = np.arange(Npop)
-
-#     # the inverse of the fitness rank
-#     rankedFitness = Npop - populationRanks
-    
-#     cumulativeFitness = np.cumsum(rankedFitness)
-#     probs = cumulativeFitness / cumulativeFitness[-1]
-    
-#     return probs
-
-
-# def pick_mate(scores, probs):
-#     # Select a mamber of the pupulation at random depending on the ranked probability
-    
-#     Nprobs = len(probs)
-#     rand = np.random.random()
-
-#     return np.argmax(rand < probs)
-
-    # for ii in range(Nprobs):
-    #     if rand < probs[ii]:
-            
-    #         return ii
-
-
-
-
-def plot_best(the_map, route, iteration_number, start, end):
-    ax = sns.heatmap(the_map)
-
-    figsize = len(the_map)
+    figsize = len(mapping)
     
     x=[start + 0.5] + [x + 0.5 for x in route[0:len(route)-1]] + [end - 0.5]
     y=[start + 0.5] + [x + 0.5 for x in route[1:len(route)]] + [end - 0.5]
@@ -292,58 +231,6 @@ def plot_best(the_map, route, iteration_number, start, end):
     # plt.savefig('images/new1000plot_%i.png' %(iteration_number), dpi=300)
     plt.show()
 
-
-
-
-# def getNewGeneration(population, gen, mapping, last_distance, start, end, 
-#                      mutateThresold, NReproducingCouples, Nsurvive,
-#                      population_size):
-#     new_population = []
-    
-#     # evaluate the fitness of the current population
-#     scores = score_population(population, mapping)
-#     fitnessProbs = get_fitness_probailities(scores)
-
-#     best = population[np.argmin(scores)]
-#     number_of_moves = len(best)
-#     distance = fitness(best, mapping)
-    
-#     if distance != last_distance:
-#         print('Iteration %i: Best so far is %i steps for a distance of %f' % (gen, number_of_moves, distance))
-#         plot_best(mapping, best, gen, start, end)
-
-    
-#     # Here we curate the population with some rules.
-#     # We first pick surviving genes by allowing the existing population to reproduce.
-#     # allow members of the population to reporuduce based on their relative score; 
-#     # i.e., if their score is higher they're more likely to reproduce
-#     for jj in range(NReproducingCouples):  
-#         mate1 = population[pick_mate(scores, fitnessProbs)]
-#         mate2 = population[pick_mate(scores, fitnessProbs)]
-        
-#         new_1, new_2 = crossover(mate1, mate2, start, end)
-#         new_1 = mutate(new_1, mutateThresold, mapping, end)
-#         new_2 = mutate(new_2, mutateThresold, mapping, end)
-        
-#         new_population = new_population + [new_1, new_2]
-
-#     # keep the best members of previous generation
-#     new_population += [population[np.argmin(scores)]]
-#     for jj in range(Nsurvive):
-#         keeper = pick_mate(scores, fitnessProbs)            
-#         new_population += [population[keeper]]
-        
-#     # add new random members
-#     while len(new_population) < population_size:
-#         new_population += [genereateValidRoute(start, end, mapping)]
-        
-#     #replace the old population with a real copy
-#     # population = copy.deepcopy(new_population)
-#     population = new_population
-            
-#     last_distance = distance
-    
-#     return population
 
 
 

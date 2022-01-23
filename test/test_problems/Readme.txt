@@ -1,0 +1,1 @@
+Tests if simplified versions of the example problems can run.

@@ -3,10 +3,18 @@
 Created on Fri Dec 18 22:59:59 2020
 
 @author: Christian
+
+
+In this model, the nonlinear material propreties for a siesmic damper are chosen
+to match a set of test data. The test data is stored in two files
+
+The example makes use of OpenSeesPy for the damper analysis, and the Hysteresis
+package for comparing dampers.
+
 """
 
 
-import naturalize as test
+import naturalize as nat
 import numpy as np
 import os
 import hysteresis as hys
@@ -14,22 +22,17 @@ import hysteresis as hys
 import matplotlib.pyplot as plt
 import openseespy.opensees as op
 
-# function to be omptimzied
-
 def testIndividual(individual):
     """
-    Tests and individual and returns the result of that test.
-    
-    The user should consider if it's possible for the test not to work.
+    Creates 
     
     """
     
     # Test outcomes:
     # The attempt at testing the individual did not work.
-    
     # The test did work, and there is a score.
     
-    [Fu, k, b, R0, cR1, cR2] = individual.genome
+    [Fu, k, b, R0, cR1, cR2] = individual.genotype[0]
     gen = str(individual.gen)
     name = str(individual.name)
     print(name)    
@@ -41,9 +44,7 @@ def testIndividual(individual):
     if not os.path.isdir(genName):
         os.mkdir(genName)
 
-        
     op.wipe()
-    
     op.model('Basic' , '-ndm',  2,  '-ndf' , 3 )
     
     
@@ -76,7 +77,6 @@ def testIndividual(individual):
     # ----------------- 
     op.element("zeroLength" , 1  , 1, 2, '-mat', 1,2,2,'-dir', 1,2,3, '-orient', 1., 0., 0., 0., 1., 0.)
     
-
     # Define Recorder(s) 
     # ----------------- 
     op.recorder( 'Node' , '-file' , 'gen' + gen + '\\' + name + ' ' + 'RFrc.out' , '-time' ,  '-nodeRange', 1,1, '-dof', 1 , 'reaction')
@@ -133,25 +133,34 @@ def testIndividual(individual):
                 
     op.wipe()    
     
+    # read the outputs from the recorder.
     fileDispName = os.path.join('gen' + str(gen), str(name) + 'Disp.out')
     fileForceName = os.path.join('gen' + str(gen), str(name) + 'RFrc.out')
     
     disp = np.loadtxt(fileDispName)
     RFrc = np.loadtxt(fileForceName)
     
-    # try:
+    # save the displacement and force data
     x = disp[:,1]
     y = -RFrc[:,1]
     
     xy = np.column_stack([x,y])
     return xy
 
-def ftest(individual):
+def ftest(individual, env):
+    """
+    In this case, the test function is sperate from ftest, this is to promote
+    reusiability of the test function. In this case
+    """
     result = testIndividual(individual)
-    individual.result = result
     return result
 
 class Environment:
+    """
+    The environment is the background test data we want to use to match our
+    damper popreties to. The data is read and some unit conversions are done.   
+    Data stored in the environment will be 
+    """
     
     def __init__(self):
         
@@ -188,14 +197,15 @@ def fitness(individual, environment):
     return diff
 
 
-
-# np.random.seed(40)
+"""
+Define bounds on the damper. These are chosen based on typical estimates
+for steel02 damper propreties.
+"""
 llims =  np.array([21.1*10**3, 2.6*10**6, 0.015, 19, .95, .15]) * 0.
 ulims =  np.array([21.1*10**3, 2.6*10**6, 0.015, 19, .95, .15]) * 1.5
-genePool = test.DefaultGenePool(llims, ulims)
+genePool = nat.BasicGenePool(llims, ulims)
 analysisEnvironment = Environment()
-
-helper = test.AlgorithmHelper(ftest, fitness, genePool, environment = analysisEnvironment)
+helper = nat.AlgorithmHelper(ftest, genePool, fitness, environment = analysisEnvironment)
 
 Ngen = 100
 Npop = 30
@@ -203,17 +213,18 @@ Ncouples = 8
 Nsurvive = 2
 mutateThresold = 0.1
 
-Analysis = test.GeneticAlgorithm(helper, Ngen, Npop, Ncouples, Nsurvive, mutateThresold)
-Analysis.optimize()
-test.pickleAnalysis(Analysis, 'OpenSees.obj')
+algorithm = nat.GeneticAlgorithm(helper, Npop, Ncouples, Nsurvive, mutateThresold)
+analysis = nat.Analysis(algorithm)
+solution = analysis.runAnalysis(Ngen)
+nat.pickleAnalysis(analysis, 'OpenSees.obj')
 
 # =============================================================================
 # 
 # =============================================================================
 
-out = test.readPickle('OpenSees.obj')
+out = nat.readPickle('OpenSees.obj')
 fig, ax = plt.subplots()
-test.plotAvgFitness(fig, ax, out)
-test.plotMinFitness(fig, ax, out)
-test.plotTotalFitness(fig, ax, out)
+nat.plotAvgFitness(fig, ax, out)
+nat.plotMinFitness(fig, ax, out)
+nat.plotTotalFitness(fig, ax, out)
 ax.set_ylim(0,3000)
