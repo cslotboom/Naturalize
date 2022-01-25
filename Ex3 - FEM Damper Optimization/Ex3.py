@@ -8,8 +8,8 @@ Created on Fri Dec 18 22:59:59 2020
 In this model, the nonlinear material propreties for a siesmic damper are chosen
 to match a set of test data. The test data is stored in two files
 
-The example makes use of OpenSeesPy for the damper analysis, and the Hysteresis
-package for comparing dampers.
+The example makes use of OpenSeesPy for the damper analysis, and the hysteresis
+package for comparing output xy curves.
 
 """
 
@@ -24,13 +24,10 @@ import openseespy.opensees as op
 
 def testIndividual(individual):
     """
-    Creates 
+    Runs a nonlinear analysis on the damper and returns the output damper 
+    hysteresis
     
     """
-    
-    # Test outcomes:
-    # The attempt at testing the individual did not work.
-    # The test did work, and there is a score.
     
     [Fu, k, b, R0, cR1, cR2] = individual.genotype[0]
     gen = str(individual.gen)
@@ -149,11 +146,46 @@ def testIndividual(individual):
 
 def ftest(individual, env):
     """
-    In this case, the test function is sperate from ftest, this is to promote
-    reusiability of the test function. In this case
+    In this case, the test function is sperate from ftest. While not strictly
+    necessary, in many cases the function being used in the optimization 
+    analysis will be 
     """
     result = testIndividual(individual)
     return result
+
+
+def fitness(individual, env):
+    """
+    Fitness functions can be used to post-process the test results, and
+    determine a single score from it test.
+    In this case, the xy curve output from the analysis is compared to the 
+    xy curve from experimental hysteresis, using the hysteresis package's 
+    compare hysteresis function.
+    """
+    
+    # Get the XY data
+    xyAnalysis = individual.result
+    
+    
+    # Try to make the output object into a hysteresis, if it can't be then 
+    # skip the analysis and assume the input values are bad. This usually 
+    # happens because the output xy curve has bad data points in it.
+    try:
+        hys1 = hys.Hysteresis(xyAnalysis)
+    except:
+        return 10**6
+    hys2 = env.hys2
+
+    # similarly, compare the input and output curves. If they can't be compared,
+    # assume there is an error.
+    try:
+        diff, test = hys.compareHys(hys1, hys2)
+    except:
+        diff  = 10**6
+   
+    return diff
+
+
 
 class Environment:
     """
@@ -176,25 +208,7 @@ class Environment:
         xyExp = np.column_stack([Backbonex, Backboney])
         self.hys2 = hys.Hysteresis(xyExp) 
 
-def fitness(individual, environment):
-    # Npoint = len(route)
-    # Indexes = np.arange(Npoint)
-    
-    xyAnalysis = individual.result
-    
-    try:
-        hys1 = hys.Hysteresis(xyAnalysis)
-    except:
-        return 10**6
-    hys2 = environment.hys2
 
-
-    try:
-        diff, test = hys.compareHys(hys1, hys2)
-    except:
-        diff  = 10**6
-   
-    return diff
 
 
 """
