@@ -5,7 +5,9 @@ Created on Sun Dec 20 18:43:11 2020
 @author: Christian
 """
 import numpy as np
-import hysteresis
+import random
+
+from abc import ABC, abstractmethod
 
 import collections
 # =============================================================================
@@ -142,35 +144,29 @@ class Genotype():
     """
 
 
-class GenePool:
-    
-    def __init__(self, llims, ulims):
+
+
+
+# class
+
+
+
+class GenePool(ABC):
+
+    @abstractmethod
+    def getNewGenotype(self, rand, lbounds, ubounds):
         """
-        llims and ulims is a list of the bounds on each gene.
-        They support any objects that can be subtracted - Typically this will be
-        a float or numpy array.
-        
-        llims and ulims alternatively can be a single numpy array.
-        In this case it will be wrapped by a list.
-        
+        The rule used to generate new genotypes.
         """
-        # If the object isn't contained in a list, make it a list
-        # This makes input cleaner
-        if isinstance(llims, list) != True:
-            llims = [llims]
-        if isinstance(ulims, list) != True:
-            ulims = [ulims]
-        else: 
-            print(not isinstance(llims, list))
-
-        
-        self.llims = llims
-        self.ulims = ulims
 
 
 
 
-class BasicGenePool:
+
+#TODO: FInd a wat o set genetype - sometimes we might only want integers, or
+# a set
+
+class BasicGenePool(GenePool):
     
     """
     The gene pool provides bounds on all possible genes. Genes are valid 
@@ -178,7 +174,7 @@ class BasicGenePool:
     or numpy array. The gene pool also generates valid genes.
         
     This default gene pool selects valid solutions from a uniform distribution
-    between two different limits.
+    where any value can be selected between two different limits.
     
     llims and ulims is a list of the bounds on each genotype. These lists can
     be any objects that can be subtracted - typically this will be a float or 
@@ -207,20 +203,13 @@ class BasicGenePool:
         Checks if the child items are lists, if so makes them np.arrays
         """
         
-        
-        # check if the input is a basic list
+        # check if the input is a basic list, e.g. [1, 2, 4, 4.5]
         noList = True
         for ii in range(len(limit)):
-            if hasattr(limit[0], "__len__"):
+            if hasattr(limit[ii], "__len__"):
                 noList = False
         if noList:
             limit = np.array(limit)
-            
-        
-        # # Check if the object is a single list. 
-        # if isinstance()
-        # if hasattr(limit[0], "__len__"):
-            
         
         # Check if subitems are a lists - if so make the np.arrays.
         for ii in range(len(limit)):
@@ -231,7 +220,6 @@ class BasicGenePool:
         # Check if item itself is a list. If not, make it a list.
         if isinstance(limit, list) != True:
             limit = [limit]
-
                 
         return limit
             
@@ -283,53 +271,194 @@ class BasicGenePool:
         return genotype
 
 
-# class deepGenePool:
+
+class DynamicGenePool(GenePool):
     
-#     """
-#     The gene pool is used to represent a gene pool where genes have 
+    """
+    The gene pool provides bounds on all possible genes. Genes are valid 
+    solutions to the optimizatoin problem, and are either a int/float, 
+    or numpy array. The gene pool also generates valid genes.
+        
+    This default gene pool selects valid solutions from a uniform distribution
+    where any value can be selected between two different limits.
     
-#     random values will be assigned to each individual gene group
+    llims and ulims is a list of the bounds on each genotype. These lists can
+    be any objects that can be subtracted - typically this will be a float or 
+    numpy array.
     
-#     A gene pool is a reflection of all current genes. It differes from the 
-#     environment in that the genes change through the analysis.
+    It's also possible to provide one gene, generally a numpy array of floats. 
+    In this case in this case that gene will be wrapped by a list.
     
-#     The environment is static!
-#     Perhaps the methods of generating genes should be in the environment?
-    
-#     This default gene pool selects valid solutions from a uniform distribution
-#     between two different limits.
+    Parameters
+    ----------
+    llims : list, or float/int/np.array
+        The lower bounds on each genes. 
+    ulims : list, or float/int/np.array
+        The upper bounds on each genes. 
+    """
        
-#     """
+    # Generates valid solutions for each individual genom
+    def __init__(self, llims, ulims, geneSizes):
+
+        self.llims = self._validateGenotype(llims)
+        self.ulims = self._validateGenotype(ulims)
+        self.geneSizes = self._validateSizes()
+
+    # def _validateGenotype(self, limit):
+    #     """
+    #     Checks if the base item is a list, makes a list if not.
+    #     Checks if the child items are lists, if so makes them np.arrays
+    #     """
+        
+    #     # check if the input is a basic list, e.g. [1, 2, 4, 4.5]
+    #     noList = True
+    #     for ii in range(len(limit)):
+    #         if hasattr(limit[ii], "__len__"):
+    #             noList = False
+    #     if noList:
+    #         limit = np.array(limit)
+        
+    #     # Check if subitems are a lists - if so make the np.arrays.
+    #     for ii in range(len(limit)):
+    #         obj = limit[ii]
+    #         if isinstance(obj, list):
+    #             limit[ii] = np.array(obj)
+                
+    #     # Check if item itself is a list. If not, make it a list.
+    #     if isinstance(limit, list) != True:
+    #         limit = [limit]
+                
+    #     return limit
+            
+            
+    # def getNewGene(self, rand, lbounds, ubounds):
+    #     """
+    #     Randomly generates a gene between the upper and lower bounds based
+    #     on a randomly generated number
+
+    #     Parameters
+    #     ----------
+    #     rand : float 
+    #         A number between 0 and 1. Used for linear interpolation between 
+    #         geenes.
+    #     lbounds : float/int/np.array
+    #         The gene's lower bound.
+    #     ubounds : float/int/np.array
+    #         The gene's upper bound.
+
+    #     Returns
+    #     -------
+    #     gene : TYPE
+    #         DESCRIPTION.
+
+    #     """
+    #     dx = ubounds - lbounds
+    #     gene = dx*rand + lbounds
+    #     return gene
     
-#     # Generates valid solutions for each individual genom
-#     def __init__(self, llims, ulims):
-#         self.super().__init(llims, ulims)
-
-#     def getGene(self, rand, lbounds, ubounds):
+    # def getNewGenotype(self):
+    #     """
+    #     Generates a new gene for each gene in the gene pool, then stores them 
+    #     in the genotype list. 
         
-#         dx = ubounds - lbounds
-#         gene = dx*rand + lbounds
-#         return gene
+        
+    #     """
+    #     Ngenes = len(self.llims)
+    #     genotype = []
+    #     for ii in range(Ngenes):
+    #         lbounds = self.llims[ii]
+    #         ubounds = self.ulims[ii]
+    #         if not isinstance(lbounds, np.ndarray):
+    #             Lgene = 1
+    #         else:
+    #             Lgene = len(lbounds)
+    #         rand = np.random.random(Lgene)
+    #         genotype.append(self.getNewGene(rand, lbounds, ubounds))
+                        
+    #     return genotype
+
+
+
+
+
+
+
+
+
+class SetGenePool(GenePool):
     
-#     def getGenotype(self):
-#         """
-#         Gets all genes and stores it in a container
-#         """
+    """
+    The set gene pool draws solutions from a set of input genes
         
-#         Ngenes = len(self.llims)
-#         genotype = []
-#         for ii in range(Ngenes):
+    This default gene pool selects valid solutions from a uniform distribution
+    where any value can be selected between two different limits.
+    
+    llims and ulims is a list of the bounds on each genotype. These lists can
+    be any objects that can be subtracted - typically this will be a float or 
+    numpy array.
+    
+    It's also possible to provide one gene, generally a numpy array of floats. 
+    In this case in this case that gene will be wrapped by a list.
+    
+    Parameters
+    ----------
+    llims : list of sets, or set
+        The sets solutions are to be drawn from. 
+    """
+       
+    # Generates valid solutions for each individual genom
+    def __init__(self, genotypes):
+        self.sets = self._validateGenotype(genotypes)
+
+    def _validateGenotype(self, genotypes):
+        """
+        Ensures the final solution is in the form [set1, set2, set3,..., setN]
+        """
         
-#             lbounds = self.llims[ii]
-#             ubounds = self.ulims[ii]
-#             rand = np.random.random(Ngenes)
-#             genotype.append(self.getGene(rand, lbounds,ubounds ))
+        # check if the input is a basic set
+        if isinstance(genotypes, list):
+            genotypes = [genotypes]
+                        
+        for ii, gene in enumerate(genotypes):
+            GeneIsSet = isinstance(gene, set)
+            if not GeneIsSet:
+                raise Exception(f'Gene {ii+1} is not a set, all genes must be a set.')
+        return genotypes
+            
+    def getNewGene(self, setIn, size):
+        """
+        Randomly generates a gene using the set and gene size
+
+        Parameters
+        ----------
+        rand : float 
+            A number between 0 and 1. Used for linear interpolation between 
+            geenes.
+        lbounds : float/int/np.array
+            The gene's lower bound.
+        ubounds : float/int/np.array
+            The gene's upper bound.
+
+        Returns
+        -------
+        gene : TYPE
+            DESCRIPTION.
+
+        """
+        return random.sample(setIn, size)
+    
+    def getNewGenotype(self):
+        """
+        Generates a new gene for each gene in the gene pool, then stores them 
+        in the genotype list. 
         
-#         return genotype
-
-
-
-
+        
+        """
+        Ngenes = len(self.sets)
+        genotype = []
+        for ii in range(Ngenes):
+            genotype.append(self.getNewGene(self.sets[ii], self.sizes[ii]))
+        return genotype
 
 
 

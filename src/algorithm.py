@@ -31,7 +31,7 @@ import numpy as np
 from copy import deepcopy
 from .solutionClass import (Individual, Generation, BasicGenePool, 
                             initPopulation, namePopulation)
-
+from .recorder import Recorder
 from .fitness import (basicFitness,
                       getProbStrategy, pick_Individual, 
                            )
@@ -107,7 +107,7 @@ class AlgorithmHelper:
 
 class GeneticAlgorithm:
     
-    def __init__(self, Npop, Ncouples, Nsurvive, Helper:AlgorithmHelper, 
+    def __init__(self, Helper:AlgorithmHelper, Npop, Ncouples, Nsurvive, 
                  mutThresold = 0.1, recordGenerations = False):
         """
         Defines how the population of solutions will change from generation 
@@ -140,7 +140,7 @@ class GeneticAlgorithm:
         self.mutThresold = mutThresold
                 
         # Record each generation if the user wants
-        self.recordGens = recordGenerations       
+        # self.recordGens = recordGenerations       
         
         # if Helper == None:
         #     Helper = AlgorithmHelper()
@@ -281,7 +281,26 @@ def getNextGen(analysis, oldGeneration, genNumber):
 
 class Analysis():
     
-    def __init__(self, algorithm:GeneticAlgorithm, recorder=None, printStatus=True):
+    def __init__(self, algorithm:GeneticAlgorithm, recorder:Recorder = None, 
+                 printStatus = False):
+        """
+        The 
+
+        Parameters
+        ----------
+        algorithm : GeneticAlgorithm
+            DESCRIPTION.
+        recorder : TYPE, optional
+            DESCRIPTION. The default is None.
+        printStatus : TYPE, optional
+            DESCRIPTION. The default is True.
+
+        Raises
+        ------
+        Exception
+            DESCRIPTION.
+
+        """
    
         self.algorithm = algorithm
         self.recorder = recorder
@@ -345,7 +364,7 @@ class Analysis():
     def runAnalysis(self, Ngen, initialGen = None):
         
         """
-        Record logic - record the veryt first generation. Then record every
+        Record logic - record the very first generation. Then record every
         the other generations after, according to user defined rules.
         
         TODO:
@@ -442,13 +461,46 @@ class Analysis():
         return myContainer.data
     
         
-def SaveGeneration():
-    pass
+
+
+import json
+def _indvToDict(genotype):
     
-def loadGeneraton():
-    pass
+    dictOut = {}
+    for ii, gene in enumerate (genotype):
+        dictOut[ii] = list(gene)
+        
+    return dictOut
+        
+def generationToDict(generation):
+    """
+    Converts the genetic information to a dictionary.
+    """
+    jsonDict = {}
+    for ii, individual in enumerate(generation):
+        jsonDict[ii] = _indvToDict(individual.genotype)
+    return jsonDict
+
+def generationToJson(generation, outFileName):
+    """
+    Saves the genetic information of a generation as a Json.
+    """
+    
+    data = generationToDict(generation)
+    
+    with open(outFileName, 'w') as f:
+        json.dump(data, f)
 
 
+def _loadJson(inputFileName):
+    with open(inputFileName, 'r') as f:
+        outputData = json.load(f)
+    return outputData
+
+
+# def JsonToGeneration(inFileName):
+#     dataRaw = _loadJson(inputFileName)
+    
 
 
 

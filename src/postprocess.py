@@ -128,9 +128,10 @@ def plotGeneValue(data, indGenotype:int, indGene:int):
     genes = reader.get(indGenotype, indGene)
     
     x = data.genNumber
-    line = plt.plot(x,genes, '.', linewidth = 0)
+    fig, ax = plt.subplots()
+    plt.plot(x,genes, '.', linewidth = 0)
     
-    return line
+    return fig, ax
     
     # return gener
     

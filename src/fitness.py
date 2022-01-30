@@ -215,7 +215,8 @@ def rouletteFitnessProbs(scores):
 
 def pick_Individual(population, probs):
     """
-    
+    Select a member of the population at random depending on a input 
+    cumulative probability distribution.
 
     Parameters
     ----------
@@ -231,7 +232,7 @@ def pick_Individual(population, probs):
 
     """
     
-    # Select a mamber of the pupulation at random depending on the ranked probability
+    # 
     rand = np.random.random()
     selection = population[np.argmax(rand < probs)]
     return selection

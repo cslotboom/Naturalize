@@ -66,12 +66,18 @@ This is tightly coupled to the individual object and generation objects
 
 class Recorder():
     
-    def __init__(self, recordEvery: int, Nstore:int = 1):
+    def __init__(self, recordEvery:int, Nstore:int = 1, printStatus = True):
+
+
+
+
+
 
         self.recordEvery = recordEvery
         self.Nstore = Nstore   
         # consider removing this reference, and instead passing in the container
         self.data = dataContainer()
+        self.printStatus = printStatus
 
     def shouldRecord(self, N):
         """
@@ -85,17 +91,53 @@ class Recorder():
     def record(self, currentGen):
         'empty'
 
+    def _recordMessaging(self, currentGen):
+        if self.printStatus == True:
+            print(f'Recorded generation {currentGen.gen}')
+        # print(currentGen.gen)
+        
+    def _setPrintStatus(self, printStatus):
+        self.printStatus = printStatus
 
 
 
 class basicRecorder(Recorder):
+    """
+    A recorder that stores basic inforamtion about each generation. 
+    This includes the absolute best score, and a pool of best individuals.
+    It's also possible to control which generations get saved.
+    
+    Caution should be taken with large analyses, it's possible to run out of 
+    memory and crash the analysis.
+    
+
+    Parameters
+    ----------
+    recordEvery : int
+        The number of generations between record points. i.e. if set equal to 3
+        generations 3, 6, 9 etc. will be stored.
+    Nstore : int, optional
+        The number of individuals to store after each generation. Individuals
+        are chosen based on their score, where those with a highest score are
+        chosen first.
+        The default is 1.
+    printStatus : bool, optional
+        A toggle that turns on or off printing messages. The default is True.
+
+    Returns
+    -------
+    None.
+    """
+
+
 
     def record(self, currentGen):
         
         if self.shouldRecord(currentGen.gen) == False:
             return
-        print(currentGen.gen)
+        # print(currentGen.gen)
         # Record the best of each generation
+        self._recordMessaging(currentGen)
         self.data.genNumber.append(currentGen.gen)
         self.recordBestAbsolute(currentGen)
         self.recordBestPool(currentGen)
@@ -262,12 +304,11 @@ def readSavedGen(FileName):
     
     
     
-def pickleAnalysis(geneticAlgorithm, fileName):
-    
+def pickleData(geneticAlgorithm, fileName):
     """
     Saves the current generation as a pickle.
+    
     """
-
     
     # Delete the old object
     if os.path.isfile(fileName):
@@ -275,8 +316,6 @@ def pickleAnalysis(geneticAlgorithm, fileName):
         print('Removing old file at: ', fileName)
     
     filehandler = open(fileName, 'wb')
-    # pickle.dump(geneticAlgorithm, filehandler)
-    # print('File Saved at: ', fileName)    
     try:
         pickle.dump(geneticAlgorithm, filehandler)
         print('File Saved at: ', fileName)
@@ -284,6 +323,11 @@ def pickleAnalysis(geneticAlgorithm, fileName):
         print('Saving Failed.')
         pass
     filehandler.close()
+    
+    
+    
+    
+    
     
     
 def readPickle(fileName):
