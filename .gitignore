@@ -6,6 +6,13 @@ __pycache__/
 *.P
 *.out
 
+# Images
+*.gif
+*.ai
+*.jpg
+*.png
+
+
 # C extensions
 *.so
 
