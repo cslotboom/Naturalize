@@ -10,6 +10,6 @@ Force is defined at the top node of the model. Each member is a 2d truss, with e
 
 </p>
 
-The genes for the problem is the area of each truss in the model
+The genotype for the problem is a single gene of size 7 - one unit for each truss in the model
 
 
