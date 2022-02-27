@@ -6,7 +6,7 @@ The truss in the example has a fixed layout, where the nodes locations and eleme
 Force is defined at the top node of the model.
 
 ![Truss Summary](Truss-Diagram.jpeg "Title")
-
+<img src="https://github.com/cslotboom/Naturalize/blob/main/examples/Structural%20Engineering%20Examples/Ex2%20-%20OpenSees%20Optimization%20of%20a%20Truss/Ex2.1%20-%20Truss%20Areas/Truss-Diagram.jpeg" alt="alt text" width=100 height=100>
 The genes for the problem is the area of each truss in the model
 
 
