@@ -9,38 +9,42 @@ Import functions and set the random seed for reproducability.
 """
 import naturalize as nat
 import numpy as np
-from functions import (ftest, fitness_basic, fitness_normalized, environment, 
+from functions import (ftest, fitness_basic, fitness_normalized, fitness_Volume, environment, 
                         plotIndividual)
+import matplotlib.pyplot as plt
+
 # np.random.seed(40)
 mm = 0.001
-
+kN = 1000
+basicOutputData = 'Basic analysis data.P'
+normOutputData = 'Normalized analysis data.P'
 
 """
 Set the forces that will be applied to the problem.
 """
-Forces = np.array([1000.,0.,0.])
+Forces = np.array([10*kN,0.,0.])
 env = environment(Forces)
 
 """
 Set up the gene pool to be uniform between 0 and 100mm^2.
 
-We'll use '
+
 """
 llims =  np.ones(11)*0.
 ulims =  np.ones(11) * 100. *mm**2
 genePool = nat.BasicGenePool(llims, ulims)
 helperBasic = nat.AlgorithmHelper(ftest, genePool, fitness_basic, environment = env)
-helperNorm = nat.AlgorithmHelper(ftest, genePool, fitness_normalized, environment = env)
+helperNorm = nat.AlgorithmHelper(ftest, genePool, fitness_Volume, environment = env)
 
 """
 Define population size. A fairly large sample size is used. We use a mutation
 rate of about 1/N_gene.
 """
 
-Ngen = 200
+Ngen = 1000
 Npop = 50
 Ncouples = 20
-Nsurvive = 2
+Nsurvive = 1
 mutateThresold = 0.1
 
 """
@@ -62,12 +66,23 @@ Run the analysis and get the output data.
 best_basic = analysisBasic.runAnalysis(Ngen)
 data = analysisBasic.getRecorderData()
 
+nat.pickleData(data, basicOutputData)
 
 
-print(f'The best basic solution is: {best_basic*10**6} squre mm')
+# print(f'The best basic solution is: {best_basic*10**6} squre mm')
 
 nat.plotAvgScore(data)
-plotIndividual(best_basic)
+
+
+
+
+
+
+
+
+
+
+
 
 # =============================================================================
 # Normalized analysis
@@ -90,14 +105,17 @@ data = analysisNorm.getRecorderData()
 print(f'The best normalized solution is: {best_basic*10**6} squre mm')
 
 nat.plotAvgScore(data)
-fig, ax = plotIndividual(best_basic)
-fig.set_figwidth(2)
-fig.set_figheight(6)
-# plt.rc('font', size=15) 
-# fig.show()
 
-for text in ax.texts:
-    text.set_fontsize(10)
+nat.pickleData(data, normOutputData)
+  
     
-for ii, line in enumerate(ax.lines):
-    line.set_linewidth(best_basic[ii]*10**6/10)
+for idv in data.bestIndividuals:
+    print(idv.result[0][0])
+    
+    
+    
+    
+    
+    
+    
+    

@@ -12,15 +12,13 @@ import os
 import dill
 
 import matplotlib.pyplot as plt
-
-
 from functions import Environment, ftest, fitness, renderImg
 
-inputGen  = 'Gen550000.P'
-outputGen = 'Gen600000.P'
+inputGen  = 'Gen750000.P'
+outputGen = 'Gen800000.P'
 Ngen = 50000
-outputData= 'Data_550-600-1-0.00025.P'
-gifName = 'Naturalize_12.gif'
+outputData= 'Data_750-800-0-0.00015.P'
+gifName = 'Naturalize_16.gif'
 
 
 dx = 252
@@ -39,7 +37,7 @@ ulims =  [np.ones(Ncircle)*dx, np.ones(Ncircle)*dy, np.ones(Ncircle)*rmax, np.on
 
 
 genePool = nat.BasicGenePool(llims, ulims)
-fmut = nat.getMutate(1)
+fmut = nat.getMutate(0)
 helper = nat.AlgorithmHelper(ftest,  genePool, fitness, fmut, environment = env)
 
 Npop = 10
@@ -84,9 +82,3 @@ images[0].save(gifName,
                save_all = True, append_images = images[1:], 
                optimize = False, duration = 2)
 
-
-
-
-
-# data = analysis.getRecorderData()
-# nat.recorder.pickleAnalysis(data, 'DataPickle.P')

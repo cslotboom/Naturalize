@@ -4,7 +4,7 @@ Created on Fri Dec 18 22:59:59 2020
 
 @author: CS
 
-Check the read-me file for a summary of the problem
+Check the read-me file for a in-depth summary of the problem
 """
 
 import numpy as np
@@ -16,11 +16,18 @@ import TrussAnalysis as ta
 class environment:
     """
     The enviroment will act as a container for the data in the problem.
-    The node coordinates and element fixities are defined as fixed values.
+    The boundary node coordinates and element fixities are defined as static 
+    values.
     """
     
     def __init__(self, forces = np.array([1000., 1000., 0.]),trussMat = 10):
         self.forces = forces
+        
+        """
+        Here the nodes and connectivityies between each node are defined for 
+        the problem. The connectivity assumes a 
+        """
+        
         self.xNodeCoords = np.array([0.,1.,0.,1.,0.,1.,1.])
         self.yNodeCoords = np.array([0.,0.,1.,1.,2.,2.,3.])
         self.Connectivity = [[1,2],[1,4],[2,4],[1,3], [3,4],[3,6],[3,5],[4,6], [5,6], [5,7], [6,7]] 
@@ -36,7 +43,7 @@ def ftest(individual, environment):
     functions.
 
     Note several values are returned as a result. 
-    We'll later process these to define our fitness value.      
+    This will be processed later to define the value of fitness.      
     
     Parameters
     ----------
@@ -44,11 +51,6 @@ def ftest(individual, environment):
         The input indivdual.
     environment : Naturalize Environment
         The input environment.
-
-    Returns
-    -------
-    result : TYPE
-        DESCRIPTION.
 
     """
 
@@ -75,12 +77,10 @@ def ftest(individual, environment):
     return disp, volume, Forces 
 
 
-
-
 def fitness_basic(individual, environment):
     """
-    The fitness function, this is what we actually want to minimize.
-    In this case, we'll minimize the displacement in the x direction.
+    Determines how good each solution is, this is what that is minimized 
+    In this case, minimize the displacement in the x direction.
 
     Parameters
     ----------
@@ -103,11 +103,11 @@ def fitness_basic(individual, environment):
     return disp
 
 
-
 def fitness_normalized(individual, environment):
     """
-    The fitness function, this is what we actually want to minimize.
-    In this case, we'll minimize the displacement multiplied by the volume.
+    Determines how good each solution is, this is what that is minimized. 
+    In this function, the displacement multiplied by volume is minimized.
+
     This will make solutions with a lower volume more attractive.
 
     Parameters
@@ -130,47 +130,92 @@ def fitness_normalized(individual, environment):
     return normDisp
 
 
+def fitness_Volume(individual, environment):
+    """
+    The fitness function, this value is what is actually minimized.
+    In this case, the volume is minimized, assuming displacement is below some 
+    limit. This will make solutions with a lower volume more attractive.
 
+    Parameters
+    ----------
+    individual : Naturalize Indivdual
+        The input indivdual.
+    environment : Naturalize Environment
+        The input environment.
+
+    Returns
+    -------
+    volume : float
+        The output volume of the truss.
+
+    """
+    
+    
+    disp, volumes, _ = individual.result
+    dx = disp[0]
+    
+    """
+    The limit could be placed within the environment function.
+    """
+    lim = 0.01
+    if dx < lim:
+        volume = np.sum(volumes)
+    # normDisp = np.abs(dx * np.sum(volumes))
+    else:
+        volume = 100*np.sum(volumes)
+    return volume
 
 
 def plotIndividual(data):
     """
-    Tests and individual and returns the result of that test.
-    
-    The user should consider if it's possible for the test not to work.
-    
-    This is an interface that converts the inputs of the invididual to the 
-    more generic inputs of the truss analysis
-    
+    Makes a matplotlib plot of the truss.
     """
     
-    # Test outcomes:
-    # The attempt at testing the individual did not work.
-    
-    # The test did work, and there is a score.
-    
-    # Passing all of these in is a little messy.
-    Areas = data
-    Forces = np.array([1000., 1000., 0.])
+    areas = data
     xNodeCoords = np.array([0.,1.,0.,1.,0.,1.,1.])
     yNodeCoords = np.array([0.,0.,1.,1.,2.,2.,3.])    
-    Connectivity = [[1,2],[1,4],[2,4],[1,3], [3,4],[3,6],[3,5],[4,6], [5,6], [5,7], [6,7]]    
-    
-    
-    # gen = str(individual.gen)
-    # name = str(individual.name)
-    # print(name)    
+    Connectivity = [[1,2],[1,4],[2,4],[1,3], [3,4], [3,6], [3,5], [4,6], [5,6], [5,7], [6,7]]    
     nodeIds = np.arange(len(Connectivity)) + 1
+    fig, ax = ta.plotTruss(areas, nodeIds, xNodeCoords, yNodeCoords, Connectivity)
+        
+    maxArea = max(areas)
+    style_blue(fig, ax, areas, maxArea)
     
-    return ta.plotTruss(Areas, nodeIds, xNodeCoords, yNodeCoords, Connectivity)
+    
+    return fig, ax
 
+def style_blue(fig, ax, areas, maxArea):
+    
+    """
+    Used to make the animated plots
+    """    
+    
+    fig.set_figwidth(8)
+    fig.set_figheight(6)
 
+    for text in ax.texts:
+        text.set_fontsize(10)
+    ax.texts = []
 
+    for ii, line in enumerate(ax.lines):
+        line.set_linewidth(5*areas[ii]/maxArea)
+        line.set_color("steelblue")
+    ax.set_facecolor("skyblue")
+    ax.collections[0].set_color('cornsilk')
+    ax.collections[0].set_zorder(10)
+    ax.collections[0].set_linewidth(2)
+    # fig.savefig("mygraph.png")
+    # ax.axis('off')
+    ax.set_xlim([-1.5, 2.5])
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['left'].set_visible(False)
 
-
-
-
-
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+    # ax.annotate("", xy=(0.9, 3), xytext=(0.5, 3),  arrowprops=dict(arrowstyle="->", color = 'red') )
+    return fig, ax
 
 
 
