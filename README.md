@@ -78,7 +78,7 @@ When comparing genetic algorithms to other optimization techniques, there are a 
 
 # Checklist for a Typical Problem
 For a typical problem the following will need to be chosen:
-- A solution space, including a gene structure to encode parameters, a gene pool that stores those parameters.
+- A solution space, including a gene structure to encode parameters and a gene pool that stores those parameters.
 - A test funciton for the potential solutions
 - A environment for data each individual needs access to
 - A rule for mutating solutions between generations
