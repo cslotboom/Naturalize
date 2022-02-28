@@ -33,7 +33,7 @@ Npop = 30               # The population of each generaton
 Ncouples = 10           # The number of couples - each makes two offspring
 Nsurvive = 1            # The number of unmodified survivors
 
-# Define the analysis objects. We
+# Define the analysis objects.
 genePool  = nat.BasicGenePool(lowerBounds, upperBounds)
 helper    = nat.AlgorithmHelper(ftest, genePool)
 algorithm = nat.GeneticAlgorithm(Npop, Ncouples, Nsurvive, helper)
@@ -44,17 +44,18 @@ print(solution)
 
 ```
 
-
-
 ## Examples of problems solved using Naturalize
-XXXX future gifs XXXX
+Some examples of problems solved using naturalized are outlined in the examples. This includes:
+Finding where to place nodes in a truss:
+![Alt Text](https://github.com/cslotboom/Naturalize/blob/main/doc/img/Truss%20Optimization.gif)
+Finding the correct position and colour of circles to draw a picture:
+![Alt Text](https://github.com/cslotboom/Naturalize/blob/main/doc/img/Full%20Analysis.gif)
 
-Math equations (Ex 1.)
-Travelling salesman problem (Ex 2.)
-Calibrating the numerical mode of a siesmic damper (Ex 3.)
-Optimizing member sizes in a truss (Ex 4.)
-Topology optimziation for a truss structural system (Ex 5., Ex 6.)
-Matching an image (Ex 7., Ex 8.)
+Detailed examples can be found in the examples folder. This includes:
+ - solving basic Math equations (Ex 1.)
+ - solving a travelling salesman problem (Ex 2.)
+ - Calibrating the numerical mode of a siesmic damper (Structural Ex 1.)
+ - Optimizing member sizes or node locations in a truss (Structural Ex 2.)
 
 ***
 
