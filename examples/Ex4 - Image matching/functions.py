@@ -2,7 +2,7 @@
 """
 Created on Mon Jun 14 23:57:18 2021
 
-Funcitons that are used to compare images with the base image. The PIL package
+Functions that are used to compare images with the base image. The PIL package
 is used to generate the images in the model.
 """
 

@@ -12,6 +12,8 @@ __pycache__/
 *.jpg
 *.png
 
+# Messy stuff users don't need.
+offline*
 
 # C extensions
 *.so

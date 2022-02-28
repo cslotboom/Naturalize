@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: Christian
+@author: CS
 
 Genetic optimization can be used to solve a number of complex problem.
 In this example, the position, radius, and opacity of circles on a grid are 
@@ -18,12 +18,19 @@ based these input circles. See the function file for these definitions.
 import naturalize as nat
 import numpy as np
 import matplotlib.pyplot as plt
+
+import sys
+sys.path.append('..')
+# import TrussAnalysis as ta
 from functions import Environment, ftest, fitness, renderImg
 
+
+
+
 """
-First we will define our environment and gene pool. The environment has been
-set up to read in the base image, and define our canvas. Because we will want
-to save our analysis and load some files, we'll also 
+First define the environment and gene pool. The environment has been
+set up to read in the base image, and define our canvas. Because the analysis
+will be saved later, some dames are also defined
 """
 
 dx = 200
@@ -37,7 +44,7 @@ outputGif = 'generations_M2_2.gif'
 env = Environment(dx,dy,ImageName)
 
 """
-We define a basic gene pool for the problem. Four genes are used:
+Next a basic gene pool is defined for the problem. Four genes are used:
     [xposition, yposition, radius, opacity]
 Each gene is a vector with a value for each circle
 """
@@ -50,13 +57,13 @@ genePool = nat.BasicGenePool(llims, ulims)
 helper = nat.AlgorithmHelper(ftest, genePool, fitness, environment = env)
 
 """
-We define the number of individuals, couples, and survivers in the analysis.
-We'll use a small gene pool, with many couples and one surviver to ensure that
-progress is made on the best solution. We'll used a moderate mutation rate, 
+Next the number of individuals, couples, and survivers in the analysis is 
+chosen. A small gene pool, with many couples and one surviver is used to ensure
+that progress is made on the best solution. A moderate mutation rate is used, 
 because the solution space is so big. A good rule of thumb is 1/N.
 There are no hard rules for selecting these parameters, and other values
-would be appripriate. Try playing around the parameters to see how they affect 
-the analysis.
+would be appripriate. Consider playing around the parameters to see how they 
+affect the analysis.
 """
 
 Ngen = 5000
@@ -68,13 +75,11 @@ mutateThresold = 0.001
 algorithm = nat.GeneticAlgorithm(helper, Npop, Ncouples, Nsurvive, mutateThresold)
 recorder  = nat.basicRecorder(25, 1)
 analysis  = nat.Analysis(algorithm, recorder, False)
-
 best = analysis.runAnalysis(Ngen)
-
 bestImg = renderImg(*best, dx, dy)
 
 """
-We can save our results to be loaded later
+The results can be saved and loaded later
 """
 
 data = analysis.getRecorderData()
@@ -88,16 +93,16 @@ nat.pickleData(data, OutputData)
 # =============================================================================
 
 """
-Here well plot the current score of the gene over time. This is the sum of the
-'net difference' between each image, that is the difference between the 'rgb' 
-value for each pixel.
+Here the current score of the gene will be plotted over time. This is the sum 
+of the 'net difference' between each image, that is the difference between the
+'rgb' value for each pixel.
 """
 plt.plot(data.genNumber, data.bestScores)
 nat.plotGeneValue(data, 2, 1)
 
 
 """
-Here we'll create a gif so we can watch the progress of our model over time.
+Here a gif of the output is made to watch the progress of our model over time.
 Not necessary but fun to see!
 """
 
