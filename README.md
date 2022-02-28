@@ -12,7 +12,7 @@ Naturalize is a customizable Python framework for solving problems using genetic
 
 Naturalize is in beta testing. This means that the solver is stable, but significant changes may occur to the function names or API. Use with caution. Comments are welcome!
 
-## Getting started, basic example
+## Getting Atarted: A Basic Example
 In this basic example, the optimum value of a function will be found within a certain sets of bounds.
 The output of the function will be minimized.
 
@@ -45,7 +45,7 @@ print(solution)
 
 ```
 
-## Examples of problems solved using Naturalize
+## Examples of Problems Solved using Naturalize
 Some examples of problems solved using naturalized are outlined in the examples. This include
 Finding where to place nodes in a truss:
 
