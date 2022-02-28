@@ -46,14 +46,17 @@ print(solution)
 ```
 
 ## Examples of Problems Solved using Naturalize
-Some examples of problems solved using naturalized are outlined in the examples. This include
-Finding where to place nodes in a truss:
+Some examples of problems solved using naturalized are outlined in the examples. This includes:
 
-![Alt Text](https://github.com/cslotboom/Naturalize/blob/main/doc/img/Truss%20Optimization.gif)
+Finding where to place nodes in a truss:
+<p align="center">
+    <img src="https://github.com/cslotboom/Naturalize/blob/main/doc/img/Truss%20Optimization.gif"/>
+</p>
 
 Finding the correct position and colour of circles to draw a picture:
-
-![Alt Text](https://github.com/cslotboom/Naturalize/blob/main/doc/img/Full%20Analysis.gif)
+<p align="center">
+    <img src="https://github.com/cslotboom/Naturalize/blob/main/doc/img/Full%20Analysis.gif"/>
+</p>
 
 Detailed examples can be found in the examples folder. This includes:
  - solving basic Math equations (Ex 1.)
