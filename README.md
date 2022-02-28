@@ -48,7 +48,7 @@ print(solution)
 ## Examples of Problems Solved using Naturalize
 Some examples of problems solved using naturalized are outlined in the examples. This includes:
 
-Finding where to place nodes in a truss:
+Finding where to place nodes in a laterally loaded truss:
 <p align="center">
     <img src="https://github.com/cslotboom/Naturalize/blob/main/doc/img/Truss%20Optimization.gif"/>
 </p>
