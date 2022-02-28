@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-"From here, let the world will be reborn."
+"From here, let the world be reborn."
 </p>
 
 
