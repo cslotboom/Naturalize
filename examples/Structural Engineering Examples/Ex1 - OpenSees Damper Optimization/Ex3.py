@@ -24,8 +24,7 @@ import openseespy.opensees as op
 
 """
 First we'll start by writting some functions
-The uses what's called a steel02'
-
+The damper uses a steel02 nonlinear material.
 
 """
 
@@ -239,7 +238,7 @@ mutateThresold = 0.1
 algorithm = nat.GeneticAlgorithm(helper, Npop, Ncouples, Nsurvive, mutateThresold)
 analysis = nat.Analysis(algorithm)
 solution = analysis.runAnalysis(Ngen)
-nat.pickleAnalysis(analysis, 'OpenSees.obj')
+nat.pickleData(analysis, 'OpenSees.obj')
 
 # =============================================================================
 # 
