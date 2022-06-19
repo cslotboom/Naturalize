@@ -235,7 +235,6 @@ class GeneticAlgorithm:
         for ii in range(len(population)):
             # score = self.fitness(population[ii], self.environment)
             # scores += [score]     
-      
             scores[ii] = self.fitness(population[ii], self.environment)
             if scores[ii] == 1.:
                 pause = True      
@@ -361,6 +360,10 @@ class Analysis():
         if self.recorder != None:
             self.recorder.record(self.currentGen)   
     
+    # def saveGen(self):
+        
+    
+    
     def runAnalysis(self, Ngen, initialGen = None):
         
         """
@@ -391,6 +394,9 @@ class Analysis():
             # we already have recordered the first generation!
             if self.genCount != 0:
                 self.record()
+                
+            # if self.genCount != 0:
+            #     self.record()                
         
         return self._smartReturn()
         
@@ -455,7 +461,10 @@ class Analysis():
         
     
     def getRecorderData(self):
-        """ Fixe the data for processing, then return it."""
+        """
+        Returns a copy of the recorder data.
+
+        """
         myContainer = deepcopy(self.recorder)
         myContainer.data.convert()
         return myContainer.data
