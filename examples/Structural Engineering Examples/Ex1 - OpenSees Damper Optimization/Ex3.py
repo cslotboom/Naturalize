@@ -30,6 +30,12 @@ The damper uses a steel02 nonlinear material.
 
 
 
+# def testDamper(Fu, k, b, R0, cR1, cR2):
+    
+    
+
+
+
 def testIndividual(individual):
     """
     Runs a nonlinear analysis on the damper and returns the output damper 
@@ -139,8 +145,8 @@ def testIndividual(individual):
     op.wipe()    
     
     # read the outputs from the recorder.
-    fileDispName = os.path.join('gen' + str(gen), str(name) + 'Disp.out')
-    fileForceName = os.path.join('gen' + str(gen), str(name) + 'RFrc.out')
+    fileDispName = os.path.join('gen' + str(gen), str(name) + ' Disp.out')
+    fileForceName = os.path.join('gen' + str(gen), str(name) + ' RFrc.out')
     
     disp = np.loadtxt(fileDispName)
     RFrc = np.loadtxt(fileForceName)
@@ -238,15 +244,23 @@ mutateThresold = 0.1
 algorithm = nat.GeneticAlgorithm(helper, Npop, Ncouples, Nsurvive, mutateThresold)
 analysis = nat.Analysis(algorithm)
 solution = analysis.runAnalysis(Ngen)
-nat.pickleData(analysis, 'OpenSees.obj')
+# nat.pickleData(analysis, 'test.obj')
 
 # =============================================================================
 # 
 # =============================================================================
 
+[2.33023155e+04, 2.94258681e+06, 2.36158239e-03, 4.06597565e+00,
+        5.68384723e-01, 1.49959762e-01]
+
+# individual.genotype[0]
+# nat.
+solution = nat.Individual(())
 out = nat.readPickle('OpenSees.obj')
 fig, ax = plt.subplots()
-nat.plotAvgFitness(fig, ax, out)
-nat.plotMinFitness(fig, ax, out)
-nat.plotTotalFitness(fig, ax, out)
+nat.plotAvgFitness(fig, ax, analysis)
+nat.plotMinFitness(fig, ax, analysis)
+nat.plotTotalFitness(fig, ax, analysis)
 ax.set_ylim(0,3000)
+
+
